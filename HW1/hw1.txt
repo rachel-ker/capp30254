@@ -5,8 +5,11 @@ Rachel Ker
 Problem 1: Data Acquistion and Analysis
 The crime reported data from Chicago open portal for 2017 and 2018 show that the number of reported incidents of crime each year is fairly similar at approximately 270,000 reports a year. In 2017, there were 268,088 reported incidents of crime and in 2018 there were 266,206 reported incidents of crime.
 
-The top 3 types of crime that are most reported in 2017 and 2018 are theft (64344 in 2017; 65073 in 2018), battery (49214 in 2017; 49781 in 2018) and criminal damage (29042 in 2017; 27805 in 2018). However, when I looked at the reported crimes that resulted in arrest, the type of crime that resulted in most arrest was Narcotics (11653 in 2017; 12969 in 2018).
+The top 3 types of crime that are most reported in 2017 and 2018 are theft (64344 in 2017; 65073 in 2018), battery (49214 in 2017; 49781 in 2018) and criminal damage (29042 in 2017; 27805 in 2018). However, when I looked at the reported crimes that resulted in arrest, the type of reported crime that resulted in most arrest was Narcotics (11653 in 2017; 12969 in 2018).
 
 By Community Areas, Community Area 25 had the most reported incidents of crime in both 2017 and 2018 and also had the most reported crimes resulting in arrest. Wards 42, 24 and 28 are the top 3 wards with the most reported incidents of crime with Wards 24 and 28 being the top 2 wards the most reported crimes that resulted in an arrest.
 
+
+
+Problem 2: Data Augmentation and APIs
 

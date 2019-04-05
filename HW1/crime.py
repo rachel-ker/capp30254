@@ -117,5 +117,84 @@ def crime_summary():
     print()
 
 
-# Problem 2:
+
+# Problem 2: Data Augmentation and APIS
+
+import censusgeocode as cg
+from uszipcode import SearchEngine
+
+def find_census_tract(lat, lon):
+    '''
+    Get census tract from latitude and longitude
+
+    Inputs: lat, lon
+    Returns census tract
+    '''
+    result= cg.coordinates(lon, lat)
+    # (From https://pypi.org/project/censusgeocode/)
+    return result['Census Tracts'][0]['BASENAME']
+
+
+def find_census_block(lat, lon):
+    '''
+    Get census block from latitude and longitude
+    
+    Inputs: lat, lon
+    Returns census block
+    '''
+    result= cg.coordinates(lon, lat)
+    return result['2010 Census Blocks'][0]['BLOCK']
+
+
+def find_zipcode_info(lat, lon):
+    '''
+    Get information on nearest zipcode using latitude and longitude
+    Information include: population, population density, occupied housing units,
+    median house value, median household income
+
+    Inputs: lat, lon
+    Returns zipcode info
+    '''
+    search = SearchEngine(simple_zipcode=True)
+    result = search.by_coordinates(lat, lon)
+    return result[0]
+    # (From https://pypi.org/project/uszipcode/)
+
+
+def get_zipcode(row):
+    return find_zipcode_info(row['Latitude'], row['Longitude']).zipcode
+
+
+def adding_zipcode_to_df(df):
+    '''
+    Adding Zip Code column to the dataframe
+
+    Inputs: Pandas dataframe
+    Returns a dataframe with the corresponding zipcode added
+    '''
+    df = df[~df['Latitude'].isna() & ~df['Longitude'].isna()]
+    zip = df.apply(get_zipcode, axis=1)
+    # Taking too much time.
+
+    df['Zip Code'] = zip
+    return df
+
+
+def augment():
+    '''
+    Augments crime data with ACS data
+    '''
+    df = get_data("data/Crimes2017.csv", "data/Crimes2018.csv")
+    df = adding_zipcode_to_df(df)
+    return df
+
+
+# (From https://jtleider.github.io/censusdata/)
+
+
+
+
+# Problem 3: Analysis and Communication
+
+
 
