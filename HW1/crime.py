@@ -5,22 +5,28 @@ Rachel Ker
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import requests
 
 
 # Problem 1: Data Acquistion and Analysis
 
+def get_data():
+    req = requests.get('https://data.cityofchicago.org/resource/d62x-nvdr.json')
+    # req.json()
+    return req.text
+'''
 def get_data(csv2017, csv2018):
-    '''
+    
     Function to read data from csv and append into one dataframe
     
     Inputs: file path for 2017 crime and 2017 crime data
     Returns a pd data frame with both datasets
-    '''
+    
     crimes2017 = pd.read_csv(csv2017)
     crimes2018 = pd.read_csv(csv2018)
     data = crimes2017.append(crimes2018)
     return data
-
+'''
 
 def arrest_data(df):
     '''
@@ -123,75 +129,52 @@ def crime_summary():
 import censusgeocode as cg
 from uszipcode import SearchEngine
 
-def find_census_tract(lat, lon):
-    '''
-    Get census tract from latitude and longitude
 
-    Inputs: lat, lon
-    Returns census tract
-    '''
-    result= cg.coordinates(lon, lat)
-    # (From https://pypi.org/project/censusgeocode/)
-    return result['Census Tracts'][0]['BASENAME']
-
-
-def find_census_block(lat, lon):
+def get_fipscode(row):
     '''
     Get census block from latitude and longitude
     
     Inputs: lat, lon
     Returns census block
     '''
-    result= cg.coordinates(lon, lat)
-    return result['2010 Census Blocks'][0]['BLOCK']
+    result= cg.coordinates(row['Longitude'], row['Latitude'])
+    fipscode = result['2010 Census Blocks'][0]['GEOID']
+    return fipscode
 
 
-def find_zipcode_info(lat, lon):
+def adding_fipscode_to_df(df):
     '''
-    Get information on nearest zipcode using latitude and longitude
-    Information include: population, population density, occupied housing units,
-    median house value, median household income
-
-    Inputs: lat, lon
-    Returns zipcode info
-    '''
-    search = SearchEngine(simple_zipcode=True)
-    result = search.by_coordinates(lat, lon)
-    return result[0]
-    # (From https://pypi.org/project/uszipcode/)
-
-
-def get_zipcode(row):
-    return find_zipcode_info(row['Latitude'], row['Longitude']).zipcode
-
-
-def adding_zipcode_to_df(df):
-    '''
-    Adding Zip Code column to the dataframe
+    Adding FIPS Code column to the dataframe
 
     Inputs: Pandas dataframe
     Returns a dataframe with the corresponding zipcode added
     '''
     df = df[~df['Latitude'].isna() & ~df['Longitude'].isna()]
-    zip = df.apply(get_zipcode, axis=1)
-    # Taking too much time.
+    fips = df.apply(get_fipscode, axis=1)
 
-    df['Zip Code'] = zip
+    df['FIPS Code'] = fips
     return df
 
+
+def get_census_data():
+    '''
+    Get Data from the 5-year ACS Census Estimates
+    '''
+    pass
 
 def augment():
     '''
     Augments crime data with ACS data
     '''
     df = get_data("data/Crimes2017.csv", "data/Crimes2018.csv")
-    df = adding_zipcode_to_df(df)
+
+    df_homicide = df[df['Primary Type'] == 'HOMICIDE']
+    df = adding_fipscode_to_df(df_homicide)
     return df
 
 
 # (From https://jtleider.github.io/censusdata/)
-
-
+# census
 
 
 # Problem 3: Analysis and Communication
