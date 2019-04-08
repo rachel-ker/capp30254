@@ -149,7 +149,7 @@ def get_geometry(row):
     Inputs: row
     Returns shapely point objects
     '''
-    return Point(int(row['longitude']), int(row['latitude']))
+    return Point(float(row['longitude']), float(row['latitude']))
 #  (Source: https://shapely.readthedocs.io/en/stable/manual.html#points)
 
 
