@@ -60,7 +60,7 @@ def crimes_by_type(df, groupby_cols):
     Returns a dataframe in descending order of values
     '''
     series = df.groupby(groupby_cols).size()
-    data = series.to_frame('Count').reset_index()
+    data = series.to_frame('count').reset_index()
     return data
 
 
@@ -74,7 +74,7 @@ def get_table(data, groupby_col):
     '''
     types_year = crimes_by_type(data, groupby_col)
     sortby = data[groupby_col[1]].max()
-    df = types_year.pivot(index=groupby_col[0], columns='Year', values='Count').sort_values(by=2018, ascending=False)
+    df = types_year.pivot(index=groupby_col[0], columns='year', values='count').sort_values(by=2018, ascending=False)
     df_10 = df.iloc[0:10]
     return df_10
 
