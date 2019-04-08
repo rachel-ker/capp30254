@@ -8,14 +8,29 @@ import matplotlib.pyplot as plt
 import requests
 
 
-# Problem 1: Data Acquistion and Analysis
-
-def get_data(year):
-    url = ('https://data.cityofchicago.org/resource/6zsd-86xi.json?year='
-          + str(year) + '&$limit=300000')
+def get_data(url):
+    '''
+    Get Data from URL using requests library
+    Inputs: url
+    Returns a pandas dataframe
+    '''
     req = requests.get(url)
     data = req.json()
     df = pd.DataFrame(data)
+    return df
+
+
+# Problem 1: Data Acquistion and Analysis
+
+def get_crime_data(year):
+    '''
+    Get Crime data from City of Chicago Data Portal
+    Inputs: year
+    Returns a pandas dataframe
+    '''
+    url = ('https://data.cityofchicago.org/resource/6zsd-86xi.json?year='
+          + str(year) + '&$limit=300000')
+    df = get_data(url)
     return df
 
 
@@ -26,7 +41,7 @@ def arrest_data(df):
     Inputs: dataframe
     Returns a dataframe of rows where arrest occured
     '''
-    arrested = df[df['Arrest']==True]
+    arrested = df[df['arrest']==True]
     return arrested
 
 
@@ -62,7 +77,9 @@ def crime_summary():
     '''
     Gets summary statistics of crime data
     '''
-    data = get_data("data/Crimes2017.csv", "data/Crimes2018.csv")
+    data_2017 = get_crime_data(2017)
+    data_2018 = get_crime_data(2018)
+    data = data_2017.append(data_2018)
 
     print("Number of reported incidents of crime by year")
     num_reported = data.groupby('Year').size().to_frame('Count').reset_index()
@@ -118,8 +135,6 @@ def crime_summary():
 # Problem 2: Data Augmentation and APIS
 
 import censusgeocode as cg
-from uszipcode import SearchEngine
-
 
 def get_fipscode(row):
     '''
@@ -152,6 +167,7 @@ def get_census_data():
     Get Data from the 5-year ACS Census Estimates
     '''
     pass
+
 
 def augment():
     '''
