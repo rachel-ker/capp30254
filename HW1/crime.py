@@ -183,9 +183,7 @@ def augment():
     Augments crime data with ACS data
     '''
     df = get_both_years()
-
-    df_homicide = df[df['primary_type'] == 'HOMICIDE']
-    df = adding_geometry_to_df(df_homicide)
+    df = adding_geometry_to_df(df)
     return df
 
 
