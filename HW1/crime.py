@@ -161,7 +161,9 @@ def find_zipcode_info(lat, lon):
 
 
 def get_zipcode(row):
-    return find_zipcode_info(row['latitude'], row['longitude']).zipcode
+    lat = float(row['latitude'])
+    lon = float(row['longitude'])
+    return find_zipcode_info(lat, lon).zipcode
 
 
 def adding_zipcode_to_df(df):
