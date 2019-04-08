@@ -6,7 +6,7 @@ Rachel Ker
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
-import censusgeocode as cg
+from shapely.geometry import Point
 
 
 def get_data(url):
@@ -142,31 +142,28 @@ def crime_summary():
 # Problem 2: Data Augmentation and APIS
 
 
-def get_fipscode(row):
+def get_geometry(row):
     '''
-    Get census block from latitude and longitude
+    Get shapely point object from latitude and longitude
     
-    Inputs: lat, lon
-    Returns census block
+    Inputs: row
+    Returns shapely point objects
     '''
-    result= cg.coordinates(row['longitude'], row['latitude'])
-    fipscode = result['2010 Census Blocks'][0]['GEOID']
-    return fipscode
-
-#  (Source: https://pypi.org/project/censusgeocode/)
+    return Point(row['longitude'], row['latitude'])
+#  (Source: https://shapely.readthedocs.io/en/stable/manual.html#points)
 
 
-def adding_fipscode_to_df(df):
+def adding_geometry_to_df(df):
     '''
-    Adding FIPS Code column to the dataframe
+    Adding geometry column to the dataframe
 
     Inputs: Pandas dataframe
-    Returns a dataframe with the corresponding zipcode added
+    Returns a dataframe with geometry
     '''
     df = df[~df['latitude'].isna() & ~df['longitude'].isna()]
-    fips = df.apply(get_fipscode, axis=1)
+    geometry = df.apply(get_geometry, axis=1)
 
-    df['fips_code'] = fips
+    df['geometry'] = geometry
     return df
 
 
@@ -182,9 +179,6 @@ def augment():
     Augments crime data with ACS data
     '''
     df = get_both_years()
-
-    df_homicide = df[df['primary_type'] == 'BATTERY']
-    df = adding_fipscode_to_df(df_homicide)
 
     df_homicide = df[df['primary_type'] == 'HOMICIDE']
     df = adding_fipscode_to_df(df_homicide)
