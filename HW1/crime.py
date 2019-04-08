@@ -7,8 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import requests
 from uszipcode import SearchEngine
-#from shapely.geometry import Point
 #import geopandas as gpd
+#from shapely.geometry import Point
 
 
 def get_data(url):
