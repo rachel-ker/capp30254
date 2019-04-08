@@ -74,7 +74,8 @@ def get_table(data, groupby_col):
     '''
     types_year = crimes_by_type(data, groupby_col)
     sortby = data[groupby_col[1]].max()
-    df = types_year.pivot(index=groupby_col[0], columns='year', values='count').sort_values(by='2018', ascending=False)
+    df = types_year.pivot(index=groupby_col[0], columns='year', values='count')
+    df = df.sort_values(ascending=False)
     df_10 = df.iloc[0:10]
     return df_10
 
