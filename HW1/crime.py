@@ -199,19 +199,25 @@ def augment():
     '''
     Augments crime data with ACS data
     '''
+    print("start")
     crime_df = get_both_years()
-    crime_df = adding_geometry_to_df(df)
+    crime_df = adding_geometry_to_df(crime_df)
+    print("got crime data")
     
     acs_detailed = get_census_data()
     acs_detailed = acs_detailed.set_index('zip code tabulation area')
+    print("got census info")
     zipcodedata = get_shape_data()
     zipcodedata = zipcodedata.set_index('zip')
+    print("got zipcode shape")
     
     # do a left join on index
     acs = zipcodedata.join(acs_detailed) 
+    print("join")
 
     crime_with_acs = geopandas.sjoin(crime_df, acs,
                                      how="inner", op='intersects')
+    print("spatial join")
     return crime_with_acs
 #   (Source: http://geopandas.org/mergingdata.html#spatial-joins)
 
