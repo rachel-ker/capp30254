@@ -7,7 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import requests
 from shapely.geometry import Point
-import geopandas
+import geopandas as gpd
 
 
 def get_data(url):
@@ -20,6 +20,8 @@ def get_data(url):
     data = req.json()
     df = pd.DataFrame(data)
     return df
+
+
 
 
 # Problem 1: Data Acquistion and Analysis
@@ -139,8 +141,9 @@ def crime_summary():
     print()
 
 
-# Problem 2: Data Augmentation and APIS
 
+
+# Problem 2: Data Augmentation and APIS
 
 def get_geometry(row):
     '''
@@ -191,9 +194,10 @@ def get_census_data():
 
 
 def get_shape_data():
-    url = "https://data.cityofchicago.org/resource/unjd-c2ca.json"
-    data = get_data(url)
-    return data
+    fname = "https://data.cityofchicago.org/resource/unjd-c2ca.geojson"
+    df = gpd.read_file(fname)
+    return df
+#   (Source: https://ocefpaf.github.io/python4oceanographers/blog/2015/03/30/geo_pandas/)
 
 
 def augment():
