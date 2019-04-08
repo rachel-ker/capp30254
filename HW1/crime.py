@@ -8,7 +8,6 @@ import matplotlib.pyplot as plt
 import requests
 import geopandas as gpd
 from shapely.geometry import Point
-#from uszipcode import SearchEngine
 
 
 
@@ -41,6 +40,10 @@ def get_crime_data(year):
 
 
 def get_both_years():
+    '''
+    Get crime data from 2017 and 2018
+    Returns a pandas dataframe
+    '''
     data_2017 = get_crime_data(2017)
     data_2018 = get_crime_data(2018)
     data = data_2017.append(data_2018)
@@ -74,10 +77,10 @@ def crimes_by_type(df, groupby_cols):
 def get_table(data, groupby_col):
     '''
     Returns a table of crime by type and year
-
     Inputs:
         pandas dataframe
         groupby_cols: list of cols to groupby
+    Returns a pandas dataframe of the top 10 values in descending orderß
     '''
     types_year = crimes_by_type(data, groupby_col)
     sortby = data[groupby_col[1]].max()
@@ -178,6 +181,14 @@ def df_to_geodataframe(df):
 def get_census_data():
     '''
     Get Data from the 5-year ACS Census Estimates
+
+    Variables include total population, race - white only,
+    no internet access, average household size, income poverty ratio below 0.5,
+    median income in the past 12 months
+
+    Data is by zip code area
+
+    Returns pandas dataframe
     '''
     url = ("https://api.census.gov/data/2017/acs/acs5?" +
            "get=GEO_ID,B01003_001E,B02001_002E,B28002_013E,B25010_001E," +
@@ -221,13 +232,19 @@ def augment():
     acs_detailed = get_census_data()
     acs_detailed = acs_detailed.set_index('zip code tabulation area')
 
-    # left join on zipcode
+    # Left join on zipcode
     crime_with_acs = crime_with_zip.join(acs_detailed)
 
     crime_with_acs.to_csv("crime_with_acs.csv")
     return crime_with_acs
 
+
 def data_analaysis(file=None):
+    '''
+    Analyzes data to answer policy questions
+    Inputs:
+        file: filepath, None if not indicated
+    '''
     if file:
         data = pd.read_csv(file)
     else:

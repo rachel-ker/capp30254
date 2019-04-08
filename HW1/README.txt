@@ -4,7 +4,9 @@ Required libraries:
 pandas
 matplotlib
 requests
-uszipcode
+geopandas, rtree, spatialindex
+shapely
+
 
 Files:
 crime.py - code for data analysis
