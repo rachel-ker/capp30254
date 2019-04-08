@@ -171,7 +171,11 @@ def get_census_data():
     '''
     Get Data from the 5-year ACS Census Estimates
     '''
-    pass
+    url = ("https://api.census.gov/data/2017/acs/acs5?" + 
+          "get=GEO_ID,B01003_001E,B02001_002E,B28002_013E,B25010_001E,"
+          "B01003_001E,NAME&for=block%20group:*&in=state:17%20county:031")
+    data = get_data(url)
+    return data
 
 
 def augment():
@@ -181,7 +185,7 @@ def augment():
     df = get_both_years()
 
     df_homicide = df[df['primary_type'] == 'HOMICIDE']
-    df = adding_fipscode_to_df(df_homicide)
+    df = adding_geometry_to_df(df_homicide)
     return df
 
 
