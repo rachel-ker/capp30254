@@ -138,6 +138,7 @@ def crime_summary():
 
 # Problem 2: Data Augmentation and APIS
 
+
 def get_fipscode(row):
     '''
     Get census block from latitude and longitude
@@ -148,6 +149,8 @@ def get_fipscode(row):
     result= cg.coordinates(row['longitude'], row['latitude'])
     fipscode = result['2010 Census Blocks'][0]['GEOID']
     return fipscode
+
+#  (Source: https://pypi.org/project/censusgeocode/)
 
 
 def adding_fipscode_to_df(df):
