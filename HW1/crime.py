@@ -10,23 +10,14 @@ import requests
 
 # Problem 1: Data Acquistion and Analysis
 
-def get_data():
-    req = requests.get('https://data.cityofchicago.org/resource/d62x-nvdr.json')
-    # req.json()
-    return req.text
-'''
-def get_data(csv2017, csv2018):
-    
-    Function to read data from csv and append into one dataframe
-    
-    Inputs: file path for 2017 crime and 2017 crime data
-    Returns a pd data frame with both datasets
-    
-    crimes2017 = pd.read_csv(csv2017)
-    crimes2018 = pd.read_csv(csv2018)
-    data = crimes2017.append(crimes2018)
-    return data
-'''
+def get_data(year):
+    url = ('https://data.cityofchicago.org/resource/6zsd-86xi.json?year='
+          + str(year) + '&$limit=300000')
+    req = requests.get(url)
+    data = req.json()
+    df = pd.DataFrame(data)
+    return df
+
 
 def arrest_data(df):
     '''
