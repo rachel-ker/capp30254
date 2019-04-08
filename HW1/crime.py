@@ -17,7 +17,12 @@ def get_data(url):
     '''
     req = requests.get(url)
     data = req.json()
-    df = pd.DataFrame(data)
+    dtype = {'year': int,
+             'arrest': bool,
+             'primary_type': str,
+             'community_area': int,
+             'ward': int}
+    df = pd.DataFrame(data, dtypes=dtype)
     return df
 
 
@@ -86,7 +91,7 @@ def crime_summary():
     data = get_both_years()
 
     print("Number of reported incidents of crime by year")
-    num_reported = data.groupby('year').size().to_frame('Count').reset_index()
+    num_reported = data.groupby('year').size().to_frame('count').reset_index()
     print(num_reported)
     print()
 
