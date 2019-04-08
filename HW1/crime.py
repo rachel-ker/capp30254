@@ -34,11 +34,13 @@ def get_crime_data(year):
     df = get_data(url)
     return df
 
+
 def get_both_years():
     data_2017 = get_crime_data(2017)
     data_2018 = get_crime_data(2018)
     data = data_2017.append(data_2018)
     return data
+
 
 def arrest_data(df):
     '''
@@ -75,7 +77,7 @@ def get_table(data, groupby_col):
     types_year = crimes_by_type(data, groupby_col)
     sortby = data[groupby_col[1]].max()
     df = types_year.pivot(index=groupby_col[0], columns='year', values='count')
-    df = df.sort_values(ascending=False)
+    df = df.sort_values(by='2018', ascending=False)
     df_10 = df.iloc[0:10]
     return df_10
 
