@@ -220,7 +220,7 @@ def augment():
     acs = zipcodedata.join(acs_detailed) 
     print("join")
 
-    crime_with_acs = geopandas.sjoin(crime_df, acs,
+    crime_with_acs = gpd.sjoin(crime_df, acs,
                                      how="inner", op='intersects')
     print("spatial join")
     return crime_with_acs
