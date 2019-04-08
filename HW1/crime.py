@@ -6,8 +6,9 @@ Rachel Ker
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
-from shapely.geometry import Point
-import geopandas as gpd
+from uszipcode import SearchEngine
+#from shapely.geometry import Point
+#import geopandas as gpd
 
 
 def get_data(url):
@@ -145,29 +146,59 @@ def crime_summary():
 
 # Problem 2: Data Augmentation and APIS
 
-def get_geometry(row):
+def find_zipcode_info(lat, lon):
     '''
-    Get shapely point object from latitude and longitude
-    
-    Inputs: row
-    Returns shapely point objects
+    Get information on nearest zipcode using latitude and longitude
+    Information include: population, population density, occupied housing units,
+    median house value, median household income
+    Inputs: lat, lon
+    Returns zipcode info
     '''
-    return Point(float(row['longitude']), float(row['latitude']))
-#  (Source: https://shapely.readthedocs.io/en/stable/manual.html#points)
+    search = SearchEngine(simple_zipcode=True)
+    result = search.by_coordinates(lat, lon)
+    return result[0]
+    # (From https://pypi.org/project/uszipcode/)
 
 
-def adding_geometry_to_df(df):
-    '''
-    Adding geometry column to the dataframe
+def get_zipcode(row):
+    return find_zipcode_info(row['latitude'], row['longitude']).zipcode
 
+
+def adding_zipcode_to_df(df):
+    '''
+    Adding Zip Code column to the dataframe
     Inputs: Pandas dataframe
-    Returns a dataframe with geometry
+    Returns a dataframe with the corresponding zipcode added
     '''
     df = df[~df['latitude'].isna() & ~df['longitude'].isna()]
-    geometry = df.apply(get_geometry, axis=1)
+    zip = df.apply(get_zipcode, axis=1)
 
-    df['geometry'] = geometry
+    df['zip'] = zip
     return df
+ 
+# def get_geometry(row):
+#     '''
+#     Get shapely point object from latitude and longitude
+    
+#     Inputs: row
+#     Returns shapely point objects
+#     '''
+#     return Point(float(row['longitude']), float(row['latitude']))
+# #  (Source: https://shapely.readthedocs.io/en/stable/manual.html#points)
+
+
+# def adding_geometry_to_df(df):
+#     '''
+#     Adding geometry column to the dataframe
+
+#     Inputs: Pandas dataframe
+#     Returns a dataframe with geometry
+#     '''
+#     df = df[~df['latitude'].isna() & ~df['longitude'].isna()]
+#     geometry = df.apply(get_geometry, axis=1)
+
+#     df['geometry'] = geometry
+#     return df
 
 
 def get_census_data():
@@ -206,25 +237,30 @@ def augment():
     '''
     print("start")
     crime_df = get_both_years()
-    crime_df = adding_geometry_to_df(crime_df)
+    crime_df = adding_zipcode_to_df(crime_df)
+    crime_df = crime_df.set_index('zip')
     print("got crime data")
     
     acs_detailed = get_census_data()
     acs_detailed = acs_detailed.set_index('zip code tabulation area')
     print("got census info")
-    zipcodedata = get_shape_data()
-    zipcodedata = zipcodedata.set_index('zip')
-    print("got zipcode shape")
-    
-    # do a left join on index
-    acs = zipcodedata.join(acs_detailed) 
-    print("join")
 
-    crime_with_acs = gpd.sjoin(crime_df, acs,
-                                     how="inner", op='intersects')
+    # do a left join on index 
+    crime_with_acs = crime_df.join(acs_detailed)
+
+#    zipcodedata = get_shape_data()
+#    zipcodedata = zipcodedata.set_index('zip')
+#    print("got zipcode shape")
+    
+#    acs = zipcodedata.join(acs_detailed) 
+#    print("join")
+
+#    crime_with_acs = gpd.sjoin(crime_df, acs,
+#                               how="inner", op='intersects')
+#   (Source: http://geopandas.org/mergingdata.html#spatial-joins)
+
     print("spatial join")
     return crime_with_acs
-#   (Source: http://geopandas.org/mergingdata.html#spatial-joins)
 
 
 
