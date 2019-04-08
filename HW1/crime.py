@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import requests
 from shapely.geometry import Point
+import geopandas
 
 
 def get_data(url):
