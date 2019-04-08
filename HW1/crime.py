@@ -138,7 +138,6 @@ def crime_summary():
     print()
 
 
-
 # Problem 2: Data Augmentation and APIS
 
 
@@ -171,9 +170,27 @@ def get_census_data():
     '''
     Get Data from the 5-year ACS Census Estimates
     '''
-    url = ("https://api.census.gov/data/2017/acs/acs5?" + 
-          "get=GEO_ID,B01003_001E,B02001_002E,B28002_013E,B25010_001E,"
-          "B01003_001E,NAME&for=block%20group:*&in=state:17%20county:031")
+    # by block groups
+    #url = ("https://api.census.gov/data/2017/acs/acs5?" + 
+    #      "get=GEO_ID,B01003_001E,B02001_002E,B28002_013E,B25010_001E,"
+    #      "B01003_001E,NAME&for=block%20group:*&in=state:17%20county:031")
+
+    # by zip codes
+    url = ("https://api.census.gov/data/2017/acs/acs5?" +
+           "get=GEO_ID,B01003_001E,B02001_002E,B28002_013E,B25010_001E," +
+           "B01003_001E,NAME&for=zip%20code%20tabulation%20area:*")
+    data = get_data(url)
+    
+    header = data.iloc[0]
+    data = data[1:]
+    data = data.rename(columns = header)
+
+    return data
+#   (Source: https://www.census.gov/data/developers/data-sets/acs-5year.html)
+
+
+def get_shape_data():
+    url = "https://data.cityofchicago.org/resource/unjd-c2ca.json"
     data = get_data(url)
     return data
 
@@ -182,13 +199,22 @@ def augment():
     '''
     Augments crime data with ACS data
     '''
-    df = get_both_years()
-    df = adding_geometry_to_df(df)
-    return df
+    crime_df = get_both_years()
+    crime_df = adding_geometry_to_df(df)
+    
+    acs_detailed = get_census_data()
+    acs_detailed = acs_detailed.set_index('zip code tabulation area')
+    zipcodedata = get_shape_data()
+    zipcodedata = zipcodedata.set_index('zip')
+    
+    # do a left join on index
+    acs = zipcodedata.join(acs_detailed) 
 
+    crime_with_acs = geopandas.sjoin(crime_df, acs,
+                                     how="inner", op='intersects')
+    return crime_with_acs
+#   (Source: http://geopandas.org/mergingdata.html#spatial-joins)
 
-# (From https://jtleider.github.io/censusdata/)
-# census
 
 
 # Problem 3: Analysis and Communication
