@@ -6,8 +6,8 @@ Rachel Ker
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
-import geopandas as gpd
-from shapely.geometry import Point
+#import geopandas as gpd
+#from shapely.geometry import Point
 
 
 
@@ -97,12 +97,12 @@ def crime_summary():
 
     print("Number of reported incidents of crime by year")
     num_reported = data.groupby('year').size().to_frame('count').reset_index()
-    print(num_reported)
+    num_reported.to_csv("tables/reported_crime.csv")
     print()
 
     print("Top 10 Reported crimes by type by year")
     table1 = get_table(data, ['primary_type', 'year'])
-    print(table1)
+    table1.to_csv("tables/top10reported_bytype_byyear.csv")
     table1.plot.bar(figsize=(20,10), rot=0)
     plt.title('Theft is the most reported crime in Chicago in 2017 and 2018')
     plt.savefig('bar_charts/Top 10 Crime reported by type by year')
@@ -110,7 +110,7 @@ def crime_summary():
     
     print("Top 10 Arrested crimes by type by year")
     table2 = get_table(arrest_data(data), ['primary_type', 'year'])
-    print(table2)
+    table2.to_csv("tables/top10arrested_bytype_byyear.csv")
     table2.plot.bar(figsize=(20,10), rot=0)
     plt.title('Narcotics results in an arrest outcome the most in Chicago in 2017 and 2018')
     plt.savefig('bar_charts/Top 10 Crime arrested by type by year')
