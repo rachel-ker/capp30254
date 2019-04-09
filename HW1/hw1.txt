@@ -12,4 +12,18 @@ By Community Areas, Community Area 25 had the most reported incidents of crime i
 
 
 Problem 2: Data Augmentation and APIs
+Overall, the zipcodes with reported crime statistics in 2017 and 2018 have a mean of 37.6% white population, 8.96% of the population with no internet access and 11.6% of the population in extreme poverty (as measured by an income 50% below the poverty line). The mean of the average household size of these zipcodes is 2.63 people. The median income of these zipcodes is $39,163.
+
+The zipcodes that have reports on 'Battery' crimes have a lower percentage of white population (31.8% in 2017, 32.1% in 2018), have a greater portion of the population with no internet access (9.83% in 2017, 9.76% in 2018) and a greater portion of the population in extreme poverty (12.6% in 2017, 12.5% in 2018) compared to the average. These zipcodes have slightly larger average household sizes at 2.71 in 2017 and 2018 separately. Th median income of these zipcodes is also slightly lower at around $38,206 for each year in 2017 and 2018.
+
+For zipcodes with reports on 'Homicide', there is even lower percentage of white population compared to the average crime report and the zipcodes with reports on 'Battery' crimes. Only 23.2% of the population were white in these zipcodes in 2017 and 21.3% of them were white in 2018. Slightly more than 10% of the population in these zipcodes have no internet in each of these years (10.7% in 2017, 10.9% in 2018) and abut 13-14% of the population is in extreme poverty (13.7% in 2017, 14.5% in 2018). The average household size in these zipcodes are slightly larger at 2.87 and 2.82 in 2017 and 2018 respectively. The median income is also lower around $33,000 ($33,959 in 2017, $33,304 in 2018).
+
+The zipcode characteristics over time in these 2 years seems to be fairly constant in that battery and homicide crimes are reported in zipcodes that have less white population, a greater portion of the population with no internet access and living in extreme poverty. The household size also tend to be larger closer to 3 people a household and a lower median income. For both years, the zipcodes that have reports on homicides seems to be more impoverished than those with reports on battery.
+Over the two years, the number of battery reports increased but the number of homicide reports decreased from 2017 to 2018.
+
+Comparing the zipcodes that have crime reports on 'Deceptive Practice' and 'Sex Offense', crime reports of 'Deceptive Practice' occur in zipcodes that are wealthier, have a higher percentage of white population and population with access to internet and lower percentage of poverty. The median income for zipcodes reporting 'Deceptive Practice' crimes for 2017 and 2018 together is at $56,488, compared to $41,679 for those reporting 'Sex Offense'. They also have a 49.2% white population and a 7.3% population with no access to internet, compared to 43.1% of white population and 8.6% population with no internet access in zipcodes reporting 'Sex Offense'. Notably, these zipcodes where these crime reports occur are very much more well-resourced than the zipcodes where crime reports of 'Battery' and 'Homicides' occur.
+
+
+Problem 3: Analysis and Communication
+
 

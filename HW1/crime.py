@@ -83,7 +83,6 @@ def get_table(data, groupby_col):
     Returns a pandas dataframe of the top 10 values in descending orderß
     '''
     types_year = crimes_by_type(data, groupby_col)
-    sortby = data[groupby_col[1]].max()
     df = types_year.pivot(index=groupby_col[0], columns='year', values='count')
     df = df.sort_values(by='2018', ascending=False)
     df_10 = df.iloc[0:10]
@@ -216,7 +215,8 @@ def get_shape_data():
 def augment():
     '''
     Augments crime data with ACS data
-    Returns dataframe that combines acs and crime data with zipcode
+
+    Saves and Returns dataframe that combines acs and crime data with zipcode
     '''
     # Use spatial join to get the zipcodes from lat and lon
     crime_df = get_both_years()
@@ -230,31 +230,134 @@ def augment():
 #   (Source: http://geopandas.org/mergingdata.html#spatial-joins)
 
     acs_detailed = get_census_data()
+    rename_dict = {'B01003_001E': 'totalpop',
+                   'B02001_002E': 'white',
+                   'B28002_013E': 'nointernetaccess',
+                   'B25010_001E': 'avghhsize',
+                   'C17002_002E': 'incpovratiobelow0.5',
+                   'B19013_001E': 'medianinc'}
+    acs_detailed.rename(columns = rename_dict, inplace=True)
     acs_detailed = acs_detailed.set_index('zip code tabulation area')
 
     # Left join on zipcode
-    crime_with_acs = crime_with_zip.join(acs_detailed)
+    crime_with_acs = crime_with_zip.join(acs_detailed).reset_index()
 
     crime_with_acs.to_csv("crime_with_acs.csv")
     return crime_with_acs
 
 
-def data_analaysis(file=None):
+def get_descriptive_stats(df):
+    '''
+    Get basic descriptive statisitics
+    Returns a pandas dataframe
+    '''
+    var_of_interest = ['perc_white', 'perc_nointernet', 'perc_poverty',
+                       'avghhsize','medianinc']
+    return df.describe()[var_of_interest]
+
+
+def data_analysis():
     '''
     Analyzes data to answer policy questions
-    Inputs:
-        file: filepath, None if not indicated
+    Returns a Geodataframe
     '''
-    if file:
-        data = pd.read_csv(file)
-    else:
-        data = augment()
+    data = augment()
+ 
+    vars = ['white', 'nointernetaccess', 'totalpop', 'avghhsize', 
+            'medianinc', 'incpovratiobelow0.5']
+    for var in vars:
+        data[var] = data[var].apply(float)
 
+    data['perc_white'] = (data['white']/data['totalpop'])
+    data['perc_nointernet'] = (data['nointernetaccess']/data['totalpop'])
+    data['perc_poverty'] = (data['incpovratiobelow0.5']/data['totalpop'])
+    overall_stats = get_descriptive_stats(data)
 
+    print("\nOverall\n")
+    print(overall_stats)
+
+    battery_2017 = data[(data['year']=='2017') & (data['primary_type']=='BATTERY')]
+    print("\nBattery 2017\n")
+    print(get_descriptive_stats(battery_2017))
+
+    battery_2018 = data[(data['year']=='2018') & (data['primary_type']=='BATTERY')]
+    print("\nBattery 2018\n")
+    print(get_descriptive_stats(battery_2018))
+
+    homicide_2017 = data[(data['year']=='2017') & (data['primary_type']=='HOMICIDE')]
+    print("\nHomicide 2017\n")
+    print(get_descriptive_stats(homicide_2017))
+
+    homicide_2018 = data[(data['year']=='2018') & (data['primary_type']=='HOMICIDE')]
+    print("\nHomicide 2018\n")
+    print(get_descriptive_stats(homicide_2018))
+
+    dp = get_descriptive_stats(data[data['primary_type']=='DECEPTIVE PRACTICE'])
+    print("\nDeceptive Practice\n")
+    print(dp)
+
+    sex_offense = get_descriptive_stats(data[data['primary_type']=='SEX OFFENSE'])
+    print("\nSex Offenses\n")
+    print(sex_offense)
+
+    return data
+
+#    To try doing plots in future
+#    data.plot(column='medianinc', cmap='OrRd', scheme='quantiles')
+#    plt.show()
+
+#    print('First plot')
+
+#    fig, ax = plt.subplots()
+#    ax.set_aspect('equal')
+#    data.plot(ax=ax, color='white', edgecolor='black')
+#    battery_2017 = data[data['year']=='2017' & data['primary_type']=='BATTERY']
+#    battery_2017.plot(ax=ax, marker='o', color='red', markersize=5)
+#    plt.show()
+#   (Source: http://geopandas.org/mapping.html)
 
 
 
 # Problem 3: Analysis and Communication
 
+def transform_dates(row):
+    '''
+    Function to get date-time object
+    '''
+    return pd.to_datetime(row['date'])
 
+
+def get_dates(df, start_date, end_date):
+    '''
+    Filter a dataframe by the start and end date
+
+    Inputs:
+        df: pandas dataframe
+        start_date / end_date: date time strings
+        e.g. '2017-01-01'
+    '''
+    dates = df.apply(transform_dates, axis=1)
+    df['datetime'] = dates
+
+    df = df[(df['datetime'] > start_date) & (df['datetime'] < end_date)]
+    return df
+
+
+def crime_statistics():
+    data = get_both_years()
+    ward43 = data[data['ward']=='43']
+
+    jul2018 = crimes_by_type(get_dates(data, '2018-06-26', '2018-07-26'),
+                             ['primary_type'])
+    jul2017 = crimes_by_type(get_dates(data, '2017-06-26', '2017-07-26'),
+                             ['primary_type'])
+
+    yr_to_date_2018 = crimes_by_type(get_dates(data, '2018-01-01', '2018-07-26'),
+                                     ['primary_type'])
+    yr_to_date_2017 = crimes_by_type(get_dates(data, '2017-01-01', '2017-07-26'),
+                                     ['primary_type'])
+
+    new_data = jul2017.join(jul2018)
+
+    pass
 
