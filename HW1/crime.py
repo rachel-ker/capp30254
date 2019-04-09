@@ -6,8 +6,8 @@ Rachel Ker
 import pandas as pd
 import matplotlib.pyplot as plt
 import requests
-#import geopandas as gpd
-#from shapely.geometry import Point
+import geopandas as gpd
+from shapely.geometry import Point
 
 
 
@@ -27,27 +27,19 @@ def get_data(url):
 
 # Problem 1: Data Acquistion and Analysis
 
-def get_crime_data(year):
+def get_crime_data(years):
     '''
     Get Crime data from City of Chicago Data Portal
-    Inputs: year
+    Inputs: list of years
     Returns a pandas dataframe
     '''
-    url = ('https://data.cityofchicago.org/resource/6zsd-86xi.json?year='
-          + str(year) + '&$limit=300000')
-    df = get_data(url)
+    df = pd.DataFrame()
+    for yr in years:
+        url = ('https://data.cityofchicago.org/resource/6zsd-86xi.json?year='
+               + str(yr) + '&$limit=300000')
+        data = get_data(url)
+        df = df.append(data)
     return df
-
-
-def get_both_years():
-    '''
-    Get crime data from 2017 and 2018
-    Returns a pandas dataframe
-    '''
-    data_2017 = get_crime_data(2017)
-    data_2018 = get_crime_data(2018)
-    data = data_2017.append(data_2018)
-    return data
 
 
 def arrest_data(df):
@@ -93,7 +85,7 @@ def crime_summary():
     '''
     Gets summary statistics of crime data
     '''
-    data = get_both_years()
+    data = get_crime_data([2017,2018])
 
     print("Number of reported incidents of crime by year")
     num_reported = data.groupby('year').size().to_frame('count').reset_index()
@@ -219,7 +211,7 @@ def augment():
     Saves and Returns dataframe that combines acs and crime data with zipcode
     '''
     # Use spatial join to get the zipcodes from lat and lon
-    crime_df = get_both_years()
+    crime_df = get_crime_data([2017,2018])
     crime_df = df_to_geodataframe(crime_df)
 
     zipcodedata = get_shape_data()
@@ -344,7 +336,7 @@ def get_dates(df, start_date, end_date):
 
 
 def crime_statistics():
-    data = get_both_years()
+    data = get_crime_data([2017,2018])
     ward43 = data[data['ward']=='43']
 
     jul2018 = crimes_by_type(get_dates(data, '2018-06-26', '2018-07-26'),
