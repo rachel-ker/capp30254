@@ -52,6 +52,22 @@ def arrest_data(df):
     return arrested
 
 
+def get_dates(df, start_date, end_date):
+    '''
+    Filter a dataframe by the start and end date
+
+    Inputs:
+        df: pandas dataframe
+        start_date / end_date: date time strings
+            e.g. '2017-01-01'
+    '''
+    dates = df.apply(lambda x: pd.to_datetime(x['date']), axis=1)
+    df['datetime'] = dates
+
+    df = df[(df['datetime'] > start_date) & (df['datetime'] < end_date)]
+    return df
+
+
 
 '''
 GET BASIC STATS
@@ -79,6 +95,20 @@ def get_descriptive_stats(df, var):
     Returns a pandas dataframe
     '''
     return df.describe()[var]
+
+
+def calculate_perc_change(data1, data2, title):
+    '''
+    Takes 2 sets of data and calculates perc change
+    Inputs: dataframes
+    Returns a dataframe with perc change
+    '''
+    data1 = data1.rename(columns={'count': 2017}).set_index('primary_type')
+    data2 = data2.rename(columns={'count': 2018}).set_index('primary_type')
+    data = data1.join(data2)
+    data.loc[:,'perc_change'] = (data[2017] - data[2018]) / data[2017] *100
+    data.to_csv("tables/perc_change_" + title)
+    return data
 
 
 def prob_crime_type_by_address(data, address):

@@ -31,7 +31,7 @@ def df_to_geodataframe(df):
     df = df[~df['latitude'].isna() & ~df['longitude'].isna()]
     geometry = df.apply(get_geometry, axis=1)
 
-    df['geometry'] = geometry
+    df.loc[:,'geometry'] = geometry
     crs = {'init': 'epsg:4326'}
     gdf = gpd.GeoDataFrame(df, crs=crs, geometry=geometry)
 #   (Source: https://gis.stackexchange.com/questions/174159/convert-a-pandas-dataframe-to-a-geodataframe)

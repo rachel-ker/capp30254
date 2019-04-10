@@ -130,46 +130,38 @@ def problem2():
 
 def problem3():
     '''
+    Calculating crime change from 2017 to 2018
     '''
     data = fn.get_crime_data([2017,2018])
+
+    data2017 = data[data['year'] == '2017']
+    data2018 = data[data['year'] == '2018']
+    all_data = fn.calculate_perc_change(data2017, data2018, "alldata")
+    print(all_data)
+
+    jul2018 = fn.crimes_by_type(fn.get_dates(data, '2018-06-26', '2018-07-26'),
+                                ['primary_type'])
+    jul2017 = fn.crimes_by_type(fn.get_dates(data, '2017-06-26', '2017-07-26'),
+                                ['primary_type'])
+    jul_data = fn.calculate_perc_change(jul2017, jul2018, "monthofjul")
+    print(jul_data)
+
     ward43 = data[data['ward']=='43']
-
-    jul2018 = fn.crimes_by_type(get_dates(data, '2018-06-26', '2018-07-26'),
+    w43jul2018 = fn.crimes_by_type(fn.get_dates(ward43, '2018-06-26', '2018-07-26'),
                              ['primary_type'])
-    jul2017 = fn.crimes_by_type(get_dates(data, '2017-06-26', '2017-07-26'),
+    w43jul2017 = fn.crimes_by_type(fn.get_dates(ward43, '2017-06-26', '2017-07-26'),
                              ['primary_type'])
+    w43jul_data = fn.calculate_perc_change(w43jul2017, w43jul2018, "monthofjul_w43")
+    print(w43jul_data)
 
-    yr_to_date_2018 = fn.crimes_by_type(get_dates(data, '2018-01-01', '2018-07-26'),
+    yr_to_date_2018 = fn.crimes_by_type(fn.get_dates(data, '2018-01-01', '2018-07-26'),
                                      ['primary_type'])
-    yr_to_date_2017 = fn.crimes_by_type(get_dates(data, '2017-01-01', '2017-07-26'),
+    yr_to_date_2017 = fn.crimes_by_type(fn.get_dates(data, '2017-01-01', '2017-07-26'),
                                      ['primary_type'])
 
-    new_data = jul2017.join(jul2018)
+    y2d_data = fn.calculate_perc_change(yr_to_date_2017, yr_to_date_2018, "yr_to_date")
+    print(y2d_data)
 
-    pass
-
-
-def transform_dates(row):
-    '''
-    Function to get date-time object
-    '''
-    return pd.to_datetime(row['date'])
-
-
-def get_dates(df, start_date, end_date):
-    '''
-    Filter a dataframe by the start and end date
-
-    Inputs:
-        df: pandas dataframe
-        start_date / end_date: date time strings
-        e.g. '2017-01-01'
-    '''
-    dates = df.apply(transform_dates, axis=1)
-    df['datetime'] = dates
-
-    df = df[(df['datetime'] > start_date) & (df['datetime'] < end_date)]
-    return df
 
 
 # Problem 4
