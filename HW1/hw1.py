@@ -134,8 +134,8 @@ def problem3():
     '''
     data = fn.get_crime_data([2017,2018])
 
-    data2017 = data[data['year'] == '2017']
-    data2018 = data[data['year'] == '2018']
+    data2017 = fn.crimes_by_type(data[data['year'] == '2017'], 'primary_type')
+    data2018 = fn.crimes_by_type(data[data['year'] == '2018'], 'primary_type')
     all_data = fn.calculate_perc_change(data2017, data2018, "alldata")
     print(all_data)
 
@@ -148,16 +148,16 @@ def problem3():
 
     ward43 = data[data['ward']=='43']
     w43jul2018 = fn.crimes_by_type(fn.get_dates(ward43, '2018-06-26', '2018-07-26'),
-                             ['primary_type'])
+                                   ['primary_type'])
     w43jul2017 = fn.crimes_by_type(fn.get_dates(ward43, '2017-06-26', '2017-07-26'),
-                             ['primary_type'])
+                                   ['primary_type'])
     w43jul_data = fn.calculate_perc_change(w43jul2017, w43jul2018, "monthofjul_w43")
     print(w43jul_data)
 
     yr_to_date_2018 = fn.crimes_by_type(fn.get_dates(data, '2018-01-01', '2018-07-26'),
-                                     ['primary_type'])
+                                        ['primary_type'])
     yr_to_date_2017 = fn.crimes_by_type(fn.get_dates(data, '2017-01-01', '2017-07-26'),
-                                     ['primary_type'])
+                                        ['primary_type'])
 
     y2d_data = fn.calculate_perc_change(yr_to_date_2017, yr_to_date_2018, "yr_to_date")
     print(y2d_data)
