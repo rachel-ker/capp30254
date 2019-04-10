@@ -80,6 +80,40 @@ def get_descriptive_stats(df, var):
     '''
     return df.describe()[var]
 
+
+def prob_crime_type_by_address(data, address):
+    '''
+    Get probability of each crime type by address
+    Inputs: 
+        data: pandas dataframe
+        address string
+    Return a pandas datafrane with probabilities for each crime type
+    '''
+    address = data[data['block'] == address]
+    num = address.groupby('primary_type').size().sort_values(ascending=False)
+    perc = num.apply(lambda x: (x/len(address))*100)
+    return perc
+
+
+def prob_of_crimetype(data, crime_type, community_areas):
+    '''
+    Calculating the probability that of crime in the community areas 
+    given a certain crime type
+    Inputs:
+        crime_type: str in CAPS
+        community_areas: list of community area number
+    Returns a float
+    '''
+    crimetype = data[data['primary_type']==crime_type]
+
+    df = pd.DataFrame()
+    for ca in community_areas:
+        data = crimetype[(crimetype['community_area'] == str(ca))]
+        df = df.append(data)
+    
+    return len(df) / len(crimetype)
+
+
 '''
 DATA VISUALIZATION/TABLES
 '''

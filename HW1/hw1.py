@@ -128,6 +128,27 @@ def problem2():
 
 # Problem 3: Analysis and Communication
 
+def problem3():
+    '''
+    '''
+    data = fn.get_crime_data([2017,2018])
+    ward43 = data[data['ward']=='43']
+
+    jul2018 = fn.crimes_by_type(get_dates(data, '2018-06-26', '2018-07-26'),
+                             ['primary_type'])
+    jul2017 = fn.crimes_by_type(get_dates(data, '2017-06-26', '2017-07-26'),
+                             ['primary_type'])
+
+    yr_to_date_2018 = fn.crimes_by_type(get_dates(data, '2018-01-01', '2018-07-26'),
+                                     ['primary_type'])
+    yr_to_date_2017 = fn.crimes_by_type(get_dates(data, '2017-01-01', '2017-07-26'),
+                                     ['primary_type'])
+
+    new_data = jul2017.join(jul2018)
+
+    pass
+
+
 def transform_dates(row):
     '''
     Function to get date-time object
@@ -151,21 +172,39 @@ def get_dates(df, start_date, end_date):
     return df
 
 
-def crime_statistics():
-    data = get_crime_data([2017,2018])
-    ward43 = data[data['ward']=='43']
+# Problem 4
 
-    jul2018 = crimes_by_type(get_dates(data, '2018-06-26', '2018-07-26'),
-                             ['primary_type'])
-    jul2017 = crimes_by_type(get_dates(data, '2017-06-26', '2017-07-26'),
-                             ['primary_type'])
+def problem4():
+    '''
+    Calculating probabilities by address or crime type
+    '''
+    data = fn.get_crime_data([2017,2018])
+    michigan = fn.prob_crime_type_by_address(data, '021XX S MICHIGAN AVE')
+    print(michigan)
 
-    yr_to_date_2018 = crimes_by_type(get_dates(data, '2018-01-01', '2018-07-26'),
-                                     ['primary_type'])
-    yr_to_date_2017 = crimes_by_type(get_dates(data, '2017-01-01', '2017-07-26'),
-                                     ['primary_type'])
+    gar_theft = fn.prob_of_crimetype(data, "THEFT", [26,27])
+    uptown_theft = fn.prob_of_crimetype(data, "THEFT", [3])
+    # East Garfield Park and West Garfield Park as defined in CPD Community Areas
+    # http://home.chicagopolice.org/wp-content/uploads/2014/11/communitymap_nov2016.pdf
 
-    new_data = jul2017.join(jul2018)
+    # Uptown as defined in CPD Community Area
+    # http://home.chicagopolice.org/wp-content/uploads/2014/11/communitymap_nov2016.pdf
+    
+    print("\nProbability of call from Garfield Park given it is a battery report\n")
+    print(gar_theft)
+    print("\nProbability of call from Uptown given it is a battery report\n")
+    print(uptown_theft)
+    print("\nDifference\n")
+    print(gar_theft - uptown_theft)
 
-    pass
+
+
+
+
+
+
+
+
+
+
 
