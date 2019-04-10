@@ -108,7 +108,7 @@ def calculate_perc_change(data1, data2, title):
     data1 = data1.rename(columns={'count': 2017}).set_index('primary_type')
     data2 = data2.rename(columns={'count': 2018}).set_index('primary_type')
     data = data1.join(data2)
-    data.loc[:,'perc_change'] = (data[2017] - data[2018]) / data[2017] *100
+    data.loc[:,'perc_change'] = (data[2018] - data[2017]) / data[2017] *100
     data.to_csv("tables/perc_change_" + title)
     return data
 
