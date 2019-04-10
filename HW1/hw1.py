@@ -78,34 +78,34 @@ def problem2():
     var_of_interest = ['perc_white', 'perc_nointernet', 'perc_poverty',
                        'avghhsize','medianinc']
 
-    overall_stats = fn.get_descriptive_stats(data, var_of_interest)
+    overall_stats = fn.get_descriptive_stats(data, var_of_interest, "overall")
 
     print("\nOverall\n")
     print(overall_stats)
 
     battery_2017 = data[(data['year']=='2017') & (data['primary_type']=='BATTERY')]
     print("\nBattery 2017\n")
-    print(fn.get_descriptive_stats(battery_2017, var_of_interest))
+    print(fn.get_descriptive_stats(battery_2017, var_of_interest, "battery2017"))
 
     battery_2018 = data[(data['year']=='2018') & (data['primary_type']=='BATTERY')]
     print("\nBattery 2018\n")
-    print(fn.get_descriptive_stats(battery_2018, var_of_interest))
+    print(fn.get_descriptive_stats(battery_2018, var_of_interest, "battery2018"))
 
     homicide_2017 = data[(data['year']=='2017') & (data['primary_type']=='HOMICIDE')]
     print("\nHomicide 2017\n")
-    print(fn.get_descriptive_stats(homicide_2017, var_of_interest))
+    print(fn.get_descriptive_stats(homicide_2017, var_of_interest, "homicide2017"))
 
     homicide_2018 = data[(data['year']=='2018') & (data['primary_type']=='HOMICIDE')]
     print("\nHomicide 2018\n")
-    print(fn.get_descriptive_stats(homicide_2018, var_of_interest))
+    print(fn.get_descriptive_stats(homicide_2018, var_of_interest, "homicide2018"))
 
     dp = fn.get_descriptive_stats(data[data['primary_type']=='DECEPTIVE PRACTICE'],
-                                  var_of_interest)
+                                  var_of_interest, "deceptivepractice1718")
     print("\nDeceptive Practice\n")
     print(dp)
 
     sex_offense = fn.get_descriptive_stats(data[data['primary_type']=='SEX OFFENSE'],
-                                           var_of_interest)
+                                           var_of_interest, "sexoffense1718")
     print("\nSex Offenses\n")
     print(sex_offense)
 

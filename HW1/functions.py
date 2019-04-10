@@ -62,7 +62,7 @@ def get_dates(df, start_date, end_date):
             e.g. '2017-01-01'
     '''
     dates = df.apply(lambda x: pd.to_datetime(x['date']), axis=1)
-    df['datetime'] = dates
+    df.loc[:,'datetime'] = dates
 
     df = df[(df['datetime'] > start_date) & (df['datetime'] < end_date)]
     return df
@@ -86,7 +86,7 @@ def crimes_by_type(df, groupby_cols):
     return data
 
 
-def get_descriptive_stats(df, var):
+def get_descriptive_stats(df, var, title):
     '''
     Get basic descriptive statisitics for census data on zipcodes
     Inputs:
@@ -94,7 +94,9 @@ def get_descriptive_stats(df, var):
         var: list of variables of interest
     Returns a pandas dataframe
     '''
-    return df.describe()[var]
+    data = df.describe()[var]
+    data.to_csv("tables/descriptive_" + title + ".csv")
+    return data
 
 
 def calculate_perc_change(data1, data2, title):
