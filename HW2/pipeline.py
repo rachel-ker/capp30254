@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 from sklearn import tree
-#from sklearn.cross_validation import train_test_split
 
 
 ###################
@@ -44,6 +43,7 @@ def descriptive_stats(df, continuous_var):
         var: list of continuous of interest
     '''
     return df.describe()[continuous_var]
+
 
 def plot_linegraph(df, continuous_var):
     '''
@@ -174,21 +174,49 @@ def get_corr_coeff(df, var1, var2):
 #  Preprocessing  #
 ###################
 
-def replace_missing(df):
-    pass
+def replace_missing_with_mean(df):
+    '''
+    Replaces null values in dataframe with the mean of the col
+    Inputs: pandas dataframe
+    Returns a pandas dataframe with missing values replaced
+    '''
+    values = {}
+    for col in df.columns:
+        values[col] = df[col].mean()
+    df.fillna(value=values, inplace=True)
+    return df
 
 
 ######################
 # Feature Generation #
 ######################
 
-def discretize(continous_var):
+def discretize(df, continuous_var, lower_bounds):
+    '''
+    Discretize continuous variable
+    Inputs:
+        df: pandas dataframe
+        continuous_var: column name
+        bounds: list of lowerbound inclusive for discretization
+    '''
+    min_val = df[continuous_var].min()
+    assert lower_bounds[0] == min_val
+    max_val = df[continuous_var].max()
+
+    lower_bounds = lower_bounds + [max_val+1]
+    for i in range(len(lower_bounds)-1):
+        df[continuous_var] = np.where(df[continuous_var].between(lower_bounds[i],
+                                                                 lower_bounds[i+1]-1),
+                                      i+1,
+                                      df[continuous_var])
+    return df
+
+
+def create_dummies(df, categorical_var):
     pass
 
-def create_dummies(categorical_var):
-    pass
 
-def standardize(var):
+def standardize(df, var):
     pass
 
 
@@ -209,15 +237,16 @@ def build_decision_tree(df):
     # (Source: https://scikit-learn.org/stable/modules/tree.html#)
 
 
-def predict(df):
+def predict(df, y_col):
     '''
     Get predictions using the Decision Tree Model
     Inputs:
         df: pandas dataframe
+        y_col: column name of target variable
     Returns an array of predicted values
     '''
     dt = build_decision_tree(df)
-    x_values = df # get features to predict
+    x_values = df.loc[:,df.columns != y_col]
 
     return dt.predict(x_values)
 
@@ -226,18 +255,17 @@ def predict(df):
 # Evaluate Classifier #
 #######################
 
-def get_accuracy(df, y_col, features):
+def get_accuracy(df, y_col):
     '''
     Get the fraction of the correctly classified instances
 
     Inputs:
         df: dataframe
         y_col: column name of target variable
-        features: list of column names of features
     Returns a float between 0 to 1
     '''
-    x_values = df.loc[:,features] #get features
-    y_values = df.loc[:,y_col] #get y_values
+    x_values = df.loc[:,df.columns != y_col]
+    y_values = df.loc[:,y_col]
     dt = build_decision_tree(df)
     
     return dt.score(x_values, y_values)
