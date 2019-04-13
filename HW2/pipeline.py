@@ -9,8 +9,11 @@ Rachel Ker
 
 import numpy as np
 import pandas as pd
-#from sklearn.cross_validation import train_test_split
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import stats
 from sklearn import tree
+#from sklearn.cross_validation import train_test_split
 
 
 ###################
@@ -30,59 +33,88 @@ def read_csvfile(csvfile):
 #  Explore Data   #
 ###################
 
-def scatterplot(df, x, y):
-    '''
-    Creates a scatter plot
-    Inputs:
-        df: pandas dataframe
-        x,y: columne names
-    Returns a matplotlib.axes.Axes
-    '''
-    return df.plot.scatter(x, y)
+# Univariate exploration
 
-
-def descriptive_stats(df, var=None):
+def descriptive_stats(df, continuous_var):
     '''
     Generates simple descriptive statistics e.g. count,
     mean, standard deviation, min, max, 25%, 50%, 70%
     Inputs:
         df: pandas dataframe
-        var: (optional) list of variables of interest
+        var: list of continuous of interest
     '''
-    if var:
-        rv = df.describe()[var]
-    rv = df.describe()
-    return rv
+    return df.describe()[continuous_var]
 
-
-def detect_outliers(df):
-    pass
-
-
-def get_corr_table(df, y):
+def plot_linegraph(df, continuous_var):
     '''
-    Get a table of pairwise correlation coefficient of all features
-    with respect to the dependent variable
+    Plot linegraphs
     Inputs:
         df: pandas dataframe
-        y: column name (dependent variable of the model)
-    Returns a pandas dataframe
+        continuous_var: column name
     '''
-    table = df.corr().loc[:,y]
-    table = table.to_frame('correlation coefficient wrt' + y).reset_index()
-    return table
+    data = df.groupby(continuous_var).size()
+    data.plot.line()
+    plt.show()
 
 
-def get_corr_coeff(df, var1, var2):
+def tabulate_counts(df, categorical_var):
     '''
-    Get a pairwise correlation coefficient of a pair of variables
+    Generate counts for categorical variables
     Inputs:
-        df: panda dataframe
-        var1, var2: column names
-    Returns a float
+        df: pandas dataframe
+        categorical_var: column name
+    Returns pandas dataframe of counts
     '''
-    corr = df.corr()
-    return corr.loc[var1, var2]
+    count= df.groupby(categorical_var).size()
+    count= count.to_frame('count')
+    return count
+
+
+def plot_barcharts_counts(df, categorical_var):
+    '''
+    Plot barcharts by tabulated counts
+    Inputs:
+        df: pandas dataframe
+        categorical_var: column name
+    '''
+    data = tabulate_counts(df, categorical_var)
+    data.plot.bar()
+    plt.show()
+
+
+def boxplot(df, var=None):
+    '''
+    Creates a box plot
+    Inputs:
+        df: pandas dataframe
+        var: (optional) list of column names
+    Returns a matplotlib.axes.Axes
+    '''
+    if var:
+        df.boxplot(grid=False, column=var)
+    else:
+        df.boxplot(grid=False)
+    plt.show() 
+
+
+def detect_outliers(df, var, threshold=1.5):
+    '''
+    Detecting outliers mathematically using interquartile range
+    Inputs:
+        df: pandas dataframe
+        threshold: (float) indicates the threshold for
+            defining an outlier e.g. if 1.5, a value outside 1.5
+            times of the interquartile range is an outlier
+    
+    Returns a panda series indicating count of outliers
+    and non-outliers for the variable
+    '''
+    q1 = df.quantile(0.25)
+    q3 = df.quantile(0.75)
+    iqr = q3 - q1
+    filtr = (df < (q1 - threshold*iqr)) | (df > (q3 + threshold*iqr))
+    return filtr.groupby(var).size()
+    # (Source: https://towardsdatascience.com/ways-to-detect-and-remove-the-outliers-404d16608dba)
 
 
 def check_missing(df):
@@ -93,6 +125,49 @@ def check_missing(df):
     Returns a pandas dataframe of the columns and its missing count
     '''
     return df.isnull().sum().to_frame('missing count').reset_index()
+
+
+# Bivariate Exploration and Relationships
+
+def scatterplot(df, x, y):
+    '''
+    Creates a scatter plot
+    Inputs:
+        df: pandas dataframe
+        x,y: column names
+    Returns a matplotlib.axes.Axes
+    '''
+    df.plot.scatter(x, y)
+    plt.show()
+
+
+def plot_corr_heatmap(df):
+    '''
+    Plots heatmap of the pairwise correlation coefficient of all features
+    with respect to the dependent variable
+    
+    Inputs:
+        df: pandas dataframe
+    '''
+    corr_table = df.corr()
+    sns.heatmap(corr_table,
+                xticklabels=corr_table.columns,
+                yticklabels=corr_table.columns,
+                cmap=sns.diverging_palette(220, 20, as_cmap=True))
+    plt.show()
+    # (Source: https://towardsdatascience.com/a-guide-to-pandas-and-matplotlib-for-data-exploration-56fad95f951c)
+    
+    
+def get_corr_coeff(df, var1, var2):
+    '''
+    Get a pairwise correlation coefficient of a pair of variables
+    Inputs:
+        df: panda dataframe
+        var1, var2: column names
+    Returns a float
+    '''
+    corr = df.corr()
+    return corr.loc[var1, var2]
 
 
 ###################
@@ -131,7 +206,7 @@ def build_decision_tree(df):
     dt_model = tree.DecisionTreeClassifier()
     dt_model.fit(x_train, y_train)
     return dt_model
-# https://scikit-learn.org/stable/modules/tree.html#
+    # (Source: https://scikit-learn.org/stable/modules/tree.html#)
 
 
 def predict(df):
