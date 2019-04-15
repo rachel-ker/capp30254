@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
 from sklearn import tree
+import graphviz
 
 
 ###################
@@ -193,38 +194,52 @@ def replace_missing_with_mean(df):
 
 def discretize(df, continuous_var, lower_bounds):
     '''
-    Discretize continuous variable
+    Discretize continuous variable by creating new var in df
     Inputs:
         df: pandas dataframe
         continuous_var: column name
         bounds: list of lowerbound inclusive for discretization
+
+    New discretized variable added to dataframe
+    Returns df
     '''
     min_val = df[continuous_var].min()
     assert lower_bounds[0] == min_val
     max_val = df[continuous_var].max()
 
     lower_bounds = lower_bounds + [max_val+1]
-    for i in range(len(lower_bounds)-1):
-        df[continuous_var] = np.where(df[continuous_var].between(lower_bounds[i],
-                                                                 lower_bounds[i+1]-1),
-                                      i+1,
-                                      df[continuous_var])
-    return df
 
+    replace_dict = {}
+    
+    for i in range(len(lower_bounds)-1):
+        key = str(lower_bounds[i]) + "_to_" + str(lower_bounds[i+1])
+        replace_dict[key] = lower_bounds[i]
+
+    df[continuous_var + "_discrete"] = pd.cut(df[continuous_var],
+                                              bins=list(replace_dict.values()) + [max_val],
+                                              labels=list(replace_dict.keys()))
+    return df
+        
 
 def create_dummies(df, categorical_var):
-    pass
-
-
-def standardize(df, var):
-    pass
+    '''
+    Creates dummy variables from categorical var
+    Inputs:
+        df: pandas dataframe
+        categorical: column name
+    Drops the categorical column
+    Returns a new dataframe with dummy variables added
+    '''
+    dummy = pd.get_dummies(df[categorical_var], prefix=categorical_var)
+    df.drop(columns=categorical_var, inplace=True)
+    return df.join(dummy)
 
 
 ######################
 #  Build Classifier  #
 ######################
 
-def build_decision_tree(df):
+def build_decision_tree(df, y_col):
     '''
     Build a decision tree classifier
     Inputs:
@@ -232,10 +247,26 @@ def build_decision_tree(df):
     Returns Decision Tree Classifier object
     '''
     dt_model = tree.DecisionTreeClassifier()
-    dt_model.fit(x_train, y_train)
+
+    x_values = df.loc[:,df.columns != y_col]
+    y_values = df.loc[:,y_col]
+    dt_model.fit(x_values, y_values)
     return dt_model
     # (Source: https://scikit-learn.org/stable/modules/tree.html#)
 
+
+def visualize_tree(dt_model, file=None):
+    '''
+    Visualization of the decision tree
+    Inputs:
+        dt_model: DecisionTreeClassifier object
+        file: (optional) filepath for visualization
+    Returns a graphviz objects
+    '''
+    data = tree.export_graphviz(dt_model, out_file=file)
+    return graphviz.Source(data)
+    # (Source: https://scikit-learn.org/stable/modules/tree.html)
+    
 
 def predict(df, y_col):
     '''
@@ -245,7 +276,7 @@ def predict(df, y_col):
         y_col: column name of target variable
     Returns an array of predicted values
     '''
-    dt = build_decision_tree(df)
+    dt = build_decision_tree(df, y_col)
     x_values = df.loc[:,df.columns != y_col]
 
     return dt.predict(x_values)
@@ -266,6 +297,6 @@ def get_accuracy(df, y_col):
     '''
     x_values = df.loc[:,df.columns != y_col]
     y_values = df.loc[:,y_col]
-    dt = build_decision_tree(df)
+    dt = build_decision_tree(df, y_col)
     
     return dt.score(x_values, y_values)
