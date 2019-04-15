@@ -216,8 +216,10 @@ def discretize(df, continuous_var, lower_bounds):
         replace_dict[key] = lower_bounds[i]
 
     df[continuous_var + "_discrete"] = pd.cut(df[continuous_var],
+                                              right=False,
                                               bins=list(replace_dict.values()) + [max_val],
-                                              labels=list(replace_dict.keys()))
+                                              labels=list(replace_dict.keys()),
+                                              include_lowest=True)
     return df
         
 
@@ -239,15 +241,18 @@ def create_dummies(df, categorical_var):
 #  Build Classifier  #
 ######################
 
-def build_decision_tree(df, y_col):
+def build_decision_tree(df, y_col, max_depth, min_leaf):
     '''
     Build a decision tree classifier
     Inputs:
         df: pandas dataframe
+        y_col: (str) column name of target variable
+        max_depth: (int) max depth of decision tree
+        min_leaf: (int) min sample in the leaf of decision tree
+        
     Returns Decision Tree Classifier object
     '''
-    dt_model = tree.DecisionTreeClassifier()
-
+    dt_model = tree.DecisionTreeClassifier(criterion='entropy', splitter='best', max_depth=max_depth, min_samples_leaf=min_leaf)
     x_values = df.loc[:,df.columns != y_col]
     y_values = df.loc[:,y_col]
     dt_model.fit(x_values, y_values)
@@ -263,20 +268,22 @@ def visualize_tree(dt_model, file=None):
         file: (optional) filepath for visualization
     Returns a graphviz objects
     '''
-    data = tree.export_graphviz(dt_model, out_file=file)
-    return graphviz.Source(data)
-    # (Source: https://scikit-learn.org/stable/modules/tree.html)
+    return graphviz.Source(tree.export_graphviz(dt_model, out_file=file))
+    # (Source: https://towardsdatascience.com/interactive-visualization-of-decision-trees-with-jupyter-widgets-ca15dd312084)
+
     
 
-def predict(df, y_col):
+def predict(df, y_col, max_depth, min_leaf):
     '''
     Get predictions using the Decision Tree Model
     Inputs:
         df: pandas dataframe
-        y_col: column name of target variable
+        y_col: (str) column name of target variable
+        max_depth: (int) max depth of decision tree
+        min_leaf: (int) min sample in the leaf of decision tree
     Returns an array of predicted values
     '''
-    dt = build_decision_tree(df, y_col)
+    dt = build_decision_tree(df, y_col, max_depth, min_leaf)
     x_values = df.loc[:,df.columns != y_col]
 
     return dt.predict(x_values)
@@ -286,17 +293,19 @@ def predict(df, y_col):
 # Evaluate Classifier #
 #######################
 
-def get_accuracy(df, y_col):
+def get_accuracy(df, y_col, max_depth, min_leaf):
     '''
-    Get the fraction of the correctly classified instances
+    Builds decision tree and gets the fraction of the correctly classified instances
 
     Inputs:
-        df: dataframe
-        y_col: column name of target variable
+        df: pandas dataframe
+        y_col: (str) column name of target variable
+        max_depth: (int) max depth of decision tree
+        min_leaf: (int) min sample in the leaf of decision tree
     Returns a float between 0 to 1
     '''
     x_values = df.loc[:,df.columns != y_col]
     y_values = df.loc[:,y_col]
-    dt = build_decision_tree(df, y_col)
+    dt = build_decision_tree(df, y_col, max_depth, min_leaf)
     
     return dt.score(x_values, y_values)
