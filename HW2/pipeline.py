@@ -11,9 +11,13 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy import stats
+
 from sklearn import tree
+from sklearn.model_selection import train_test_split
 import graphviz
+
+from IPython.display import SVG
+from IPython.display import display
 
 
 ###################
@@ -241,71 +245,109 @@ def create_dummies(df, categorical_var):
 #  Build Classifier  #
 ######################
 
-def build_decision_tree(df, y_col, max_depth, min_leaf):
+def select_features(df, y_col, features):
+    '''
+    Keep only the relevant columns for model building
+    Inputs:
+        df: pandas dataframe
+        y_col: col name for target variable
+        features: list of features
+    Return a data frame that only contains these relevant col
+    '''
+    return df.loc[:, features + [y_col]]
+
+
+def split_training_testing(df, y_col, test_size):
+    '''
+    Splits the dataset into training and testing sets
+    Inputs:
+        df: pandas dataframe
+        y_col: col name for target variable
+        test_size: (between 0 and 1) percentage of data to use for testing set
+    Returns x_train, x_test, y_train, y_test
+    '''
+    x = df.loc[:,df.columns != y_col]
+    y = df.loc[:,y_col]
+    return train_test_split(x, y, test_size=test_size, random_state=100)
+    
+
+def build_decision_tree(x, y, max_depth, min_leaf):
     '''
     Build a decision tree classifier
     Inputs:
-        df: pandas dataframe
-        y_col: (str) column name of target variable
+        x, y: training sets for features and labels
         max_depth: (int) max depth of decision tree
         min_leaf: (int) min sample in the leaf of decision tree
         
     Returns Decision Tree Classifier object
     '''
     dt_model = tree.DecisionTreeClassifier(criterion='entropy', splitter='best', max_depth=max_depth, min_samples_leaf=min_leaf)
-    x_values = df.loc[:,df.columns != y_col]
-    y_values = df.loc[:,y_col]
-    dt_model.fit(x_values, y_values)
+    dt_model.fit(x, y)
     return dt_model
     # (Source: https://scikit-learn.org/stable/modules/tree.html#)
 
 
-def visualize_tree(dt_model, file=None):
+
+def visualize_tree(dt, feature_labels, class_labels, file=None):
     '''
     Visualization of the decision tree
     Inputs:
         dt_model: DecisionTreeClassifier object
+        feature_labels: a list of labels for features
+        class_labels: a list of labels for target class
         file: (optional) filepath for visualization
     Returns a graphviz objects
     '''
-    return graphviz.Source(tree.export_graphviz(dt_model, out_file=file))
+    graph = graphviz.Source(tree.export_graphviz(dt, out_file=file,
+                                                 feature_names=feature_labels,
+                                                 class_names=class_labels))
+    return graph
     # (Source: https://towardsdatascience.com/interactive-visualization-of-decision-trees-with-jupyter-widgets-ca15dd312084)
 
-    
 
-def predict(df, y_col, max_depth, min_leaf):
+def get_labels(df, y_col):
     '''
-    Get predictions using the Decision Tree Model
+    Get feature labels
     Inputs:
         df: pandas dataframe
         y_col: (str) column name of target variable
-        max_depth: (int) max depth of decision tree
-        min_leaf: (int) min sample in the leaf of decision tree
-    Returns an array of predicted values
+    Return a list of feature labels
     '''
-    dt = build_decision_tree(df, y_col, max_depth, min_leaf)
-    x_values = df.loc[:,df.columns != y_col]
-
-    return dt.predict(x_values)
+    return df.loc[:,df.columns != y_col].columns
 
 
 #######################
 # Evaluate Classifier #
 #######################
 
-def get_accuracy(df, y_col, max_depth, min_leaf):
+def get_accuracy(dt, x_test, y_test):
     '''
     Builds decision tree and gets the fraction of the correctly classified instances
 
     Inputs:
-        df: pandas dataframe
+        dt: decision tree model
+        x_test, y_test: testing sets from the data
+    Returns a float between 0 and 1
+    '''
+    return dt.score(x_test, y_test)
+
+
+def build_and_test_classifier(df, y_col, test_size, max_depth, min_leaf):
+    '''
+    Split test and train sets, build and visualize classifier and returns
+    accuracy score
+    
+    Inputs:
+        df: pandas dataframe with selected features
         y_col: (str) column name of target variable
+        test_size: (between 0 and 1) percentage of data to use for testing set
         max_depth: (int) max depth of decision tree
         min_leaf: (int) min sample in the leaf of decision tree
-    Returns a float between 0 to 1
+        
+    Returns accuracy score between 0 and 1
     '''
-    x_values = df.loc[:,df.columns != y_col]
-    y_values = df.loc[:,y_col]
-    dt = build_decision_tree(df, y_col, max_depth, min_leaf)
-    
-    return dt.score(x_values, y_values)
+    x_train, x_test, y_train, y_test = split_training_testing(df, y_col, test_size)
+    dt = build_decision_tree(x_train, y_train, max_depth=max_depth, min_leaf=min_leaf)
+    graph = visualize_tree(dt, get_labels(df, y_col), ['No', 'Yes'])
+    display(SVG(graph.pipe(format='svg')))
+    return get_accuracy(dt, x_test, y_test)
