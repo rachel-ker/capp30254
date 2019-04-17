@@ -300,7 +300,8 @@ def visualize_tree(dt, feature_labels, class_labels, file=None):
     '''
     graph = graphviz.Source(tree.export_graphviz(dt, out_file=file,
                                                  feature_names=feature_labels,
-                                                 class_names=class_labels))
+                                                 class_names=class_labels,
+                                                 filled=True))
     return graph
     # (Source: https://towardsdatascience.com/interactive-visualization-of-decision-trees-with-jupyter-widgets-ca15dd312084)
 
