@@ -14,6 +14,7 @@ import seaborn as sns
 
 from sklearn import tree
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 import graphviz
 
 from IPython.display import SVG
@@ -237,7 +238,6 @@ def create_dummies(df, categorical_var):
     Returns a new dataframe with dummy variables added
     '''
     dummy = pd.get_dummies(df[categorical_var], prefix=categorical_var)
-    df.drop(columns=categorical_var, inplace=True)
     return df.join(dummy)
 
 
@@ -321,16 +321,34 @@ def get_labels(df, y_col):
 # Evaluate Classifier #
 #######################
 
-def get_accuracy(dt, x_test, y_test):
+def predict_prob(dt, x_test):
     '''
-    Builds decision tree and gets the fraction of the correctly classified instances
+    Get predicted probabilities from the model
+
+    Inputs:
+        dt: decision tree model
+        x_test: testing set for the features
+    Returns an array of predicted probability
+    '''
+    return dt.predict_proba(x_test)[:,1]
+
+
+def accuracy_prediction(dt, x_test, y_test, threshold):
+    '''
+    Builds decision tree and gets the prediction accuracy from
+    the model according to specified threshold
 
     Inputs:
         dt: decision tree model
         x_test, y_test: testing sets from the data
+        threshold: specified probability threshold to
+            classify obs as positive
     Returns a float between 0 and 1
     '''
-    return dt.score(x_test, y_test)
+    pred_prob = predict_prob(dt, x_test)
+    calc_threshold = lambda x,y: 0 if x < y else 1 
+    predicted_test = np.array( [calc_threshold(score, threshold) for score in pred_prob] )                    
+    return accuracy_score(y_test, predicted_test)
 
 
 def build_and_test_classifier(df, y_col, test_size, max_depth, min_leaf):
@@ -350,5 +368,5 @@ def build_and_test_classifier(df, y_col, test_size, max_depth, min_leaf):
     x_train, x_test, y_train, y_test = split_training_testing(df, y_col, test_size)
     dt = build_decision_tree(x_train, y_train, max_depth=max_depth, min_leaf=min_leaf)
     graph = visualize_tree(dt, get_labels(df, y_col), ['No', 'Yes'])
-    display(SVG(graph.pipe(format='svg')))
-    return get_accuracy(dt, x_test, y_test)
+    display(SVG(graph.pipe(format='svg')))    
+    return accuracy_prediction(dt, x_test, y_test, 0.5)
