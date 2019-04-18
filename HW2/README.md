@@ -4,7 +4,8 @@ This repository contains files for Homework 2, a simple machine learning pipelin
   
 Files:  
 pipeline.py - code for the general functions in machine learning pipeline (to read, explore data, build classifier, etc.)  
-hw2-writeup.ipynb - write up on the data  
+hw2-writeup.ipynb - write up on the credit data  
+hw2.py - code applied to credit data
 requirements.txt - required libraries and versions  
 
 Homework 2 Machine Learning Pipeline.pdf - Assignment description
