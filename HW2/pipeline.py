@@ -234,10 +234,11 @@ def create_dummies(df, categorical_var):
     Inputs:
         df: pandas dataframe
         categorical: column name
-    Drops the categorical column
     Returns a new dataframe with dummy variables added
     '''
-    dummy = pd.get_dummies(df[categorical_var], prefix=categorical_var)
+    dummy = pd.get_dummies(df[categorical_var],
+                           prefix=categorical_var,
+                           drop_first=True)
     return df.join(dummy)
 
 
@@ -281,7 +282,10 @@ def build_decision_tree(x, y, max_depth, min_leaf):
         
     Returns Decision Tree Classifier object
     '''
-    dt_model = tree.DecisionTreeClassifier(criterion='entropy', splitter='best', max_depth=max_depth, min_samples_leaf=min_leaf)
+    dt_model = tree.DecisionTreeClassifier(criterion='entropy',
+                                           splitter='best',
+                                           max_depth=max_depth,
+                                           min_samples_leaf=min_leaf)
     dt_model.fit(x, y)
     return dt_model
     # (Source: https://scikit-learn.org/stable/modules/tree.html#)
@@ -321,40 +325,40 @@ def get_labels(df, y_col):
 # Evaluate Classifier #
 #######################
 
-def predict_prob(dt, x_test):
+def predict_prob(model, x_test):
     '''
     Get predicted probabilities from the model
 
     Inputs:
-        dt: decision tree model
+        model: sklearn model
         x_test: testing set for the features
     Returns an array of predicted probability
     '''
-    return dt.predict_proba(x_test)[:,1]
+    return model.predict_proba(x_test)[:,1]
 
 
-def accuracy_prediction(dt, x_test, y_test, threshold):
+def accuracy_prediction(model, x_test, y_test, threshold):
     '''
     Builds decision tree and gets the prediction accuracy from
     the model according to specified threshold
 
     Inputs:
-        dt: decision tree model
+        model: sklearn model
         x_test, y_test: testing sets from the data
         threshold: specified probability threshold to
             classify obs as positive
     Returns a float between 0 and 1
     '''
-    pred_prob = predict_prob(dt, x_test)
+    pred_prob = predict_prob(model, x_test)
     calc_threshold = lambda x,y: 0 if x < y else 1 
     predicted_test = np.array( [calc_threshold(score, threshold) for score in pred_prob] )                    
     return accuracy_score(y_test, predicted_test)
 
 
-def build_and_test_classifier(df, y_col, test_size, max_depth, min_leaf):
+def build_and_test_decision_tree(df, y_col, test_size, max_depth, min_leaf):
     '''
-    Split test and train sets, build and visualize classifier and returns
-    accuracy score
+    Split test and train sets, build and visualize decision tree
+    and returns accuracy score
     
     Inputs:
         df: pandas dataframe with selected features
