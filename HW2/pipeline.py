@@ -310,6 +310,24 @@ def visualize_tree(dt, feature_labels, class_labels, file=None):
     # (Source: https://towardsdatascience.com/interactive-visualization-of-decision-trees-with-jupyter-widgets-ca15dd312084)
 
 
+def feature_importance(df, y_col, dt):
+    '''
+    Get the feature importance of each feature
+    Inputs:
+        df: pandas dataframe
+        y_col: (str) column name of target variable
+        dt: decision tree
+    Return a dataframe of feature importance
+    '''
+    d = {'Features': get_labels(df, y_col),
+         'Importance': dt.feature_importances_}
+    feature_importance = pd.DataFrame(data=d)
+    feature_importance = feature_importance.sort_values(by=['Importance'],
+                                                        ascending=False)
+    return feature_importance
+    
+    
+
 def get_labels(df, y_col):
     '''
     Get feature labels
@@ -372,5 +390,6 @@ def build_and_test_decision_tree(df, y_col, test_size, max_depth, min_leaf):
     x_train, x_test, y_train, y_test = split_training_testing(df, y_col, test_size)
     dt = build_decision_tree(x_train, y_train, max_depth=max_depth, min_leaf=min_leaf)
     graph = visualize_tree(dt, get_labels(df, y_col), ['No', 'Yes'])
-    display(SVG(graph.pipe(format='svg')))    
+    display(SVG(graph.pipe(format='svg')))
+    print(feature_importance(df, y_col, dt))
     return accuracy_prediction(dt, x_test, y_test, 0.5)
