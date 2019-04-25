@@ -19,10 +19,7 @@ from IPython.display import SVG
 from IPython.display import display
 
 import etl
-import decisiontree
-#from sklearn.linear_model import LogisticRegression
-#from sklearn.svm import LinearSVC
-
+import classifiers
 
 
 ######################
@@ -69,7 +66,7 @@ def build_decision_trees(df, x_train, y_train, x_test, y_test,
     for d in max_depth:
         for l in min_leaf:
             for c in criterion:
-                dt = decisiontree.build_decision_tree(x_train, y_train,
+                dt = classifiers.build_decision_tree(x_train, y_train,
                                                       max_depth=d, min_leaf=l, criterion=c)
                 
                 scores = get_predicted_scores(dt, x_test)
@@ -260,7 +257,7 @@ def selected_decision_tree(df, x_train, y_train, x_test, y_test,
 
     Returns None
     '''
-    dt = decisiontree.build_decision_tree(x_train, y_train,
+    dt = classifiers.build_decision_tree(x_train, y_train,
                                           max_depth=max_depth, min_leaf=min_leaf,
                                           criterion=criterion)
 
@@ -270,8 +267,8 @@ def selected_decision_tree(df, x_train, y_train, x_test, y_test,
     print("max_depth: {}, min_leaf: {}, criterion: {}".format(d, l, c))
     evaluate_model(y_test, pred_label)
 
-    graph = decisiontree.visualize_tree(dt, get_labels(df, y_col), ['No', 'Yes'])
+    graph = classifiers.visualize_tree(dt, get_labels(df, y_col), ['No', 'Yes'])
     display(SVG(graph.pipe(format='svg')))
-    print(decisiontree.feature_importance(df, y_col, dt))
+    print(classifiers.feature_importance(df, y_col, dt))
     
                          
