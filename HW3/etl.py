@@ -123,15 +123,16 @@ def check_missing(df):
 
 # Bivariate Exploration and Relationships
 
-def scatterplot(df, x, y):
+def scatterplot(df, x, y, y_col):
     '''
     Creates a scatter plot
     Inputs:
         df: pandas dataframe
         x,y: column names
+        y_col: (str) column name of target variable
     Returns a matplotlib.axes.Axes
     '''
-    df.plot.scatter(x, y)
+    df.plot.scatter(x, y, c=y_col, colormap='PiYG')
     plt.show()
 
 

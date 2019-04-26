@@ -22,11 +22,6 @@ import classifiers
 #  Build Classifier  #
 ######################
 
-# To include:
-# Logistic Regression, K-Nearest Neighbor, SVM
-# Random Forests, Boosting, and Bagging
-
-
 def split_training_testing(df, y_col, features, test_size):
     '''
     Splits the dataset into training and testing sets
@@ -66,11 +61,11 @@ def build_decision_trees(x_train, y_train, x_test, y_test,
                                                       max_depth=d, min_leaf=l, criterion=c)
                 
                 scores = get_predicted_scores(dt, x_test)
-                print(scores)
                 pred_label = get_prediction_labels(scores, threshold)
                 
                 print("max_depth: {}, min_leaf: {}, criterion: {}".format(d, l, c))
                 evaluate_model(y_test, scores, threshold)
+
 
 
 #######################
@@ -157,7 +152,7 @@ def get_accuracy_score(y_test, predicted_label):
     return sklearn.metrics.accuracy_score(y_test, predicted_label)
 
 
-def get_confusion_matrix(y_test, predicted_label, threshold):
+def get_confusion_matrix(y_test, predicted_label):
     '''
     Get True Negatives, False Positives, False Negatives and True Positives
 
@@ -222,7 +217,29 @@ def get_auc(y_test, predicted_score):
         
     Returns area under the ROC
     '''
-    return sklearn.metrics.f1_score(y_test, predicted_score)
+    return sklearn.metrics.roc_auc_score(y_test, predicted_score)
+
+
+def plot_roc_curve(y_test, predicted_score, label):
+    '''
+    Plot the ROC curve
+    Inputs:
+        y_test: real labels for testing set
+        predicted_score: predicted score from predict proba/decision fn
+        label: (str) model specifications
+    '''
+    plt.figure()
+    plt.plot(fpr, tpr, label=label + ' (area = {:.2f})'.format(get_auc(y_test, predicted_score)))
+    plt.plot([0, 1], [0, 1],'r--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.0])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver operating characteristic')
+    plt.legend(loc="lower right")
+    plt.savefig(label+'_ROC')
+    plt.show()
+    # (Source: https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8)
 
 
 def evaluate_model(y_test, predicted_score, threshold):
@@ -243,7 +260,7 @@ def evaluate_model(y_test, predicted_score, threshold):
     print("    The precision is {:.2f}".format(get_precision(y_test, pred_label)))
     print("    The recall is {:.2f}".format(get_recall(y_test, pred_label)))
     print("    The f1 score is {:.2f}".format(get_f1(y_test, pred_label)))
-#    print("    The area under the ROC is {:.2f}".format(get_auc(y_test, predicted_score)))
+    print("    The area under the ROC is {:.2f}".format(get_auc(y_test, predicted_score)))
     print()
     
  
@@ -259,6 +276,7 @@ def plot_precision_recall_curve(y_test, predicted_scores):
     precision, recall, thresholds = precision_recall_curve(y_test, predicted_scores)
     plt.plot(recall, precision, marker='.')
     plt.show()
+
 
 
 # Evaluate Specific Chosen Classifiers #

@@ -5,11 +5,52 @@ Rachel Ker
 
 import pandas as pd
 
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
+from sklearn.ensemble import BaggingClassifier, GradientBoostingClassifier, RandomForestClassifier
 
 import graphviz
+from mlxtend.plotting import plot_decision_regions
+
+SEED = 0
+
+#######################
+# K-nearest neighbors #
+#######################
+
+def build_knn(x_train, y_train, k, weight, p=2, dist='minkowski'):
+    '''
+    Build a k-nearest neighbors model
+    Inputs:
+        x_train, y_train: training sets for features and labels
+        k: (int) number of neighbors
+        weight: (str) 'uniform' or 'distance'
+        p: (int) optional, default=2 (Euclidian distance).
+            also, p=1 (manhatten distance)
+        dist: (str) optional, distance metric. default is 'minkowski'
+        
+    '''
+    knn = KNeighborsClassifier(n_neighbors=k,
+                               weights=weight,
+                               metric='minkowski',
+                               random_state= SEED)
+    knn.fit(x_train, y_train)
+    return knn
+
+
+def find_closest_neighbors(knn, n, point):
+    '''
+    Identifiest the closest neighbors
+    Inputs:
+        knn: knn model object
+        n: (int) number of closest neighbors
+        point: (array) array that represents that instance
+    
+    Returns an array of (distance, index)
+    '''
+    return knn.kneighbors(X=point, n_neighbors=n)
 
 
 ######################
@@ -21,6 +62,7 @@ def build_decision_tree(x_train, y_train, criterion, max_depth, min_leaf):
     Build a decision tree classifier
     Inputs:
         x_train, y_train: training sets for features and labels
+        criterion: (str) gini or entropy
         max_depth: (int) max depth of decision tree
         min_leaf: (int) min sample in the leaf of decision tree
         
@@ -30,10 +72,9 @@ def build_decision_tree(x_train, y_train, criterion, max_depth, min_leaf):
                                            splitter='best',
                                            max_depth=max_depth,
                                            min_samples_leaf=min_leaf,
-                                           random_state=0)
+                                           random_state=SEED)
     dt_model.fit(x_train, y_train)
     return dt_model
-    # (Source: https://scikit-learn.org/stable/modules/tree.html#)
 
 
 
@@ -88,7 +129,7 @@ def get_labels(df, y_col):
 #######################
 
 
-def logistic_regression(x_train, y_train, penalty, c):
+def build_logistic_regression(x_train, y_train, penalty, c):
     '''
     Build a logistic regression classifier
     Inputs:
@@ -102,11 +143,23 @@ def logistic_regression(x_train, y_train, penalty, c):
     lr = LogisticRegression(penalty=penalty,
                             C=c,
                             solver='liblinear',
-                            random_state=0)
+                            random_state=SEED)
     lr.fit(x_train, y_train)
     return lr
 
-# lr.coeff_
+
+def plot_regression_line(lr, x_train)
+    plt.lr()
+    plt.scatter(x_train.ravel(), y, color='black', zorder=20)
+    X_test = np.linspace(-5, 10, 300)
+
+    def model(x):
+        return 1 / (1 + np.exp(-x))
+
+    loss = model(X_test * lr.coef_ + lr.intercept_).ravel()
+    plt.plot(X_test, loss, color='red', linewidth=3)
+    plt.show()
+    # (Source: https://scikit-learn.org/stable/auto_examples/linear_model/plot_logistic.html)
 
 
 ##########################
@@ -122,8 +175,99 @@ def build_svm(x_train, y_train, c):
             smaller values specify stronger regularization        
     Returns classifier object
     '''
-    svm = LinearSVC(random_state=0, tol=1e-5, C=c)
+    svm = LinearSVC(random_state=0, tol=1e-5, C=c, random_state=SEED)
     svm.fit(x_train, y_train)
     return svm
 
 
+def plot_svm_boundaries(svm, x_train, y_train, y_col):
+    '''
+    Plot decision boundaries for svm
+
+    Inputs:
+        svm: svm classifier object
+        x_train, y_train: training sets
+        y_col: (str) column name of target variable
+    '''
+    plot_decision_regions(X=x_train, 
+                          y=y_train,
+                          clf=svm, 
+                          legend=2)
+
+    plt.xlabel('Features', size=14)
+    plt.ylabel(y_col, size=14)
+    plt.title('SVM Decision Region Boundary', size=16)
+    plt.show()
+    # (Source: http://rasbt.github.io/mlxtend/user_guide/plotting/plot_decision_regions)
+
+
+
+##########################
+#     Random Forests     #
+##########################
+
+def build_random_forest(x_train, y_train, n, criterion, max_depth, min_leaf):
+    '''
+    Build a Random Forest classifier
+    Inputs:
+        x_train, y_train: training sets for features and labels
+        n: number of trees in the forest
+        criterion: (str) gini or entropy
+        max_depth: (int) max depth of decision tree
+        min_leaf: (int) min sample in the leaf of decision tree
+    Returns classifier object
+    '''
+    rf = RandomForestClassifier(n_estimators=n,
+                                criterion=criterion,
+                                max_depth=max_depth,
+                                min_samples_leaf=min_leaf,
+                                random_state=SEED)
+    rf.fit(x_train, y_train)
+    return rf
+    
+
+
+##########################
+#       Bagging          #
+##########################
+
+def build_bagging(x_train, y_train, base_model, n, max_samples, max_features):
+    '''
+    Build a Bagging classifier
+    Inputs:
+        x_train, y_train: training sets for features and labels
+        base_estimator: classifier object
+        n: number of base estimator in the ensemble
+        max_samples: (int) number of samples to draw from X to train each base estimator
+        max_features: (int) number of features to draw from X to train each base estimator
+    Returns classifier object
+    '''
+    bag = BaggingClassifier(base_estimator=base_model,
+                            n_estimator=n,
+                            max_samples=max_samples,
+                            max_features=max_features,
+                            random_state=SEED)
+    bag.fit(x_train, y_train)
+    return bag
+                            
+
+
+
+##########################
+#       Boosting         #
+##########################
+
+def build_gradient_boosting(x_train, y_train, n, max_depth):
+    '''
+    Build a gradient boosting classifier
+    Inputs:
+        x_train, y_train: training sets for features and labels
+        n: number of trees in the forest
+        max_depth: (int) max depth of decision tree
+    Returns classifier object  
+    '''
+    gbc = GradientBoostingClassifier(n_estimator=n,
+                                     max_depth=max_depth
+                                     random_state=SEED)
+
+# Good read: https://medium.com/@rrfd/boosting-bagging-and-stacking-ensemble-methods-with-sklearn-and-mlens-a455c0c982de
