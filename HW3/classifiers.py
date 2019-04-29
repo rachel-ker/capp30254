@@ -35,7 +35,7 @@ def build_knn(x_train, y_train, k, weight, p=2, dist='minkowski'):
     knn = KNeighborsClassifier(n_neighbors=k,
                                weights=weight,
                                metric='minkowski',
-                               random_state= SEED)
+                               random_state=SEED)
     knn.fit(x_train, y_train)
     return knn
 
@@ -148,7 +148,7 @@ def build_logistic_regression(x_train, y_train, penalty, c):
     return lr
 
 
-def plot_regression_line(lr, x_train)
+def plot_regression_line(lr, x_train):
     plt.lr()
     plt.scatter(x_train.ravel(), y, color='black', zorder=20)
     X_test = np.linspace(-5, 10, 300)
@@ -175,7 +175,7 @@ def build_svm(x_train, y_train, c):
             smaller values specify stronger regularization        
     Returns classifier object
     '''
-    svm = LinearSVC(random_state=0, tol=1e-5, C=c, random_state=SEED)
+    svm = LinearSVC(tol=1e-5, C=c, random_state=SEED)
     svm.fit(x_train, y_train)
     return svm
 
@@ -267,7 +267,7 @@ def build_gradient_boosting(x_train, y_train, n, max_depth):
     Returns classifier object  
     '''
     gbc = GradientBoostingClassifier(n_estimator=n,
-                                     max_depth=max_depth
+                                     max_depth=max_depth,
                                      random_state=SEED)
 
 # Good read: https://medium.com/@rrfd/boosting-bagging-and-stacking-ensemble-methods-with-sklearn-and-mlens-a455c0c982de

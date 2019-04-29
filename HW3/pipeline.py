@@ -6,7 +6,7 @@ preprocss data, generate features, build classifer, and evaluate classifier
 
 Rachel Ker
 '''
-
+import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -18,13 +18,14 @@ from IPython.display import display
 
 import classifiers
 
+
 ######################
 #  Build Classifier  #
 ######################
 
 def split_training_testing(df, y_col, features, test_size):
     '''
-    Splits the dataset into training and testing sets
+    Splits the dataset into training and testing sets randomly
     Inputs:
         df: pandas dataframe
         y_col: col name for target variable
@@ -35,6 +36,37 @@ def split_training_testing(df, y_col, features, test_size):
     x = df.loc[:, features]
     y = df.loc[:,y_col]
     return train_test_split(x, y, test_size=test_size, random_state=100)
+
+
+def temporal_split(df, y_col, features, date_col,
+                   train_start_date, train_end_date,
+                   test_start_date, test_end_date):
+    '''
+    Splits dataset by time
+    Inputs:
+        df: pandas dataframe
+        y_col: col name for target variable
+        features: list of features
+        train_start_date, train_end_date: tuple of (year, month, date) - training set start and end dates inclusive
+        test_start_date, test_end_date: tuple of (year, month, date) - testing set start and end dates inclusive
+    Returns x_train, x_test, y_train, y_test
+    '''
+    train_start_yy, train_start_mm, train_start_dd = train_start_date
+    train_end_yy, train_end_mm, train_end_dd = train_end_date
+    test_start_yy, test_start_mm, test_start_dd = test_start_date
+    test_end_yy, test_end_mm, test_end_dd = test_end_date
+
+    train = df[(df[date_col] >= pd.Timestamp(train_start_yy, train_start_mm, train_start_dd)) 
+               & (df[date_col] <= pd.Timestamp(train_end_yy, train_end_mm, train_end_dd))]
+    test = df[(df[date_col] >= pd.Timestamp(test_start_yy, test_start_mm, test_start_dd)) 
+               & (df[date_col] <= pd.Timestamp(test_end_yy, test_end_mm, test_end_dd))]
+
+    x_train = train.loc[:, features]
+    x_test = test.loc[:, features]
+    y_train = train.loc[:, y_col]
+    y_test = test.loc[:, y_col]
+        
+    return x_train, x_test, y_train, y_test
 
 
 def build_decision_trees(x_train, y_train, x_test, y_test,
@@ -254,8 +286,10 @@ def evaluate_model(y_test, predicted_score, threshold):
     print("The true number positives is {}/{} from the data, with percentage {:.2f}%\n".format(
           sum(y_test), len(y_test), 100.*sum(y_test)/len(y_test)))
     print("Threshold: {}".format(threshold))
+    
     pred_label = get_prediction_labels(predicted_score, threshold)
-    print("    The total number of predicted positives is {}".format(threshold, sum(pred_label)))
+    
+    print("    The total number of predicted positives is {}".format(sum(pred_label)))
     print("    The accuracy is {:.2f}".format(get_accuracy_score(y_test, pred_label)))
     print("    The precision is {:.2f}".format(get_precision(y_test, pred_label)))
     print("    The recall is {:.2f}".format(get_recall(y_test, pred_label)))

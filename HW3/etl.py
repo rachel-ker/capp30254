@@ -169,14 +169,43 @@ def get_corr_coeff(df, var1, var2):
 #  Preprocessing  #
 ###################
 
-def replace_missing_with_mean(df):
+def replace_dates_with_datetime(df, date_cols):
+    '''
+    Replace date columns with datetime
+    Inputs:
+        df: dataframe
+        date_cols: list of date columns
+    Returns dataframe with datetime columns
+    '''
+    df[date_cols] = df[date_cols].apply(pd.to_datetime)
+    return df
+
+
+def replace_missing_with_mode(df, cols):
     '''
     Replaces null values in dataframe with the mean of the col
-    Inputs: pandas dataframe
+    Inputs:
+        df: pandas dataframe
+        cols: list of col
     Returns a pandas dataframe with missing values replaced
     '''
     values = {}
-    for col in df.columns:
+    for col in cols:
+        values[col] = df[col].mode().loc[0]
+    df.fillna(value=values, inplace=True)
+    return df
+
+
+def replace_missing_with_mean(df, cols):
+    '''
+    Replaces null values in dataframe with the mean of the col
+    Inputs:
+        df: pandas dataframe
+        cols: list of col
+    Returns a pandas dataframe with missing values replaced
+    '''
+    values = {}
+    for col in cols:
         values[col] = df[col].mean()
     df.fillna(value=values, inplace=True)
     return df
