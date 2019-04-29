@@ -18,6 +18,7 @@ from IPython.display import display
 
 import classifiers
 
+SEED = 0
 
 ######################
 #  Build Classifier  #
@@ -35,7 +36,7 @@ def split_training_testing(df, y_col, features, test_size):
     '''
     x = df.loc[:, features]
     y = df.loc[:,y_col]
-    return train_test_split(x, y, test_size=test_size, random_state=100)
+    return train_test_split(x, y, test_size=test_size, random_state=SEED)
 
 
 def temporal_split(df, y_col, features, date_col,
@@ -79,24 +80,28 @@ def build_decision_trees(x_train, y_train, x_test, y_test,
         x_train, y_train: training sets from the data
         x_test, y_test: testing sets from data
         y_col: (str) column name of target variable
-        threshold: specified probability threshold to classify obs as positive
+        threshold: (list of threshold to test)
         max_depth: (list of int) max depth of decision tree
         min_leaf: (list of int) min sample in the leaf of decision tree
         criterion: (list of str) optional, defaults to ['entropy','gini']
 
-    Returns None
+    Returns a pandas dataframe summary of models and metrics
     '''
+    df = pd.DataFrame()
+    
     for d in max_depth:
         for l in min_leaf:
             for c in criterion:
                 dt = classifiers.build_decision_tree(x_train, y_train,
-                                                      max_depth=d, min_leaf=l, criterion=c)
-                
-                scores = get_predicted_scores(dt, x_test)
-                pred_label = get_prediction_labels(scores, threshold)
-                
-                print("max_depth: {}, min_leaf: {}, criterion: {}".format(d, l, c))
-                evaluate_model(y_test, scores, threshold)
+                                                     max_depth=d, min_leaf=l,
+                                                     criterion=c)                                
+                dic = vary_threshold(dt, x_test, y_test, threshold)
+                dic["max_depth"] = [d] * len(threshold)
+                dic["min_leaf"] = [l] * len(threshold)
+                dic["criterion"] = [c] * len(threshold)
+                table = pd.DataFrame(data=dic)
+                df = df.append(table)
+    return df
 
 
 
@@ -155,15 +160,37 @@ def vary_threshold(model, x_test, y_test, threshold, svm=False):
         model: 
         x_test, y_test: testing sets from data
         threshold: (list of threshold to test)
-        svm: if the model is svm (defaults to False)    
+        svm: if the model is svm (defaults to False)
+
+    Returns a dictionary
     ''' 
+    table = {"true_num_positives": [],
+             "total_obs": [],
+             "threshold": [],
+             "predicted_num_positives": [],
+             "accuracy": [],
+             "precision": [],
+             "recall": [],
+             "f1_score": [],
+             "auc": []}
+    
     for t in threshold:
         if svm:
             scores = get_predicted_scores_for_svm(model, x_test)
         else:
             scores = get_predicted_scores(model, x_test)
-        pred_label = get_prediction_labels(scores, t)
-        evaluate_model(y_test, scores, t)
+
+        table["true_num_positives"] += [sum(y_test)]
+        table["total_obs"] += [len(y_test)]
+        table["threshold"] += [t]
+        table["predicted_num_positives"] += [sum(get_prediction_labels(scores, t))]
+        table["accuracy"] += [get_accuracy_score(y_test, scores, t)]
+        table["precision"] += [get_precision(y_test, scores, t)]
+        table["recall"] += [get_recall(y_test, scores, t)]
+        table["f1_score"] += [get_f1(y_test, scores, t)]
+        table["auc"] += [get_auc(y_test, scores)]
+
+    return table
 
 
 
@@ -171,71 +198,75 @@ def vary_threshold(model, x_test, y_test, threshold, svm=False):
 # Evaluate Classifier #
 #######################
 
-def get_accuracy_score(y_test, predicted_label):
+def get_accuracy_score(y_test, predicted_score, threshold):
     '''
     Get accuracy score for the predicted labels
     
     Inputs:
         y_test: real labels for testing set
-        predicted_label: predicted labels from the model
-
+        predicted_scores: array of predicted scores from model
+        threshold: specified probability threshold to classify obs as positive
     Returns accuracy score
     '''
+    predicted_label = get_prediction_labels(predicted_score, threshold)
     return sklearn.metrics.accuracy_score(y_test, predicted_label)
 
 
-def get_confusion_matrix(y_test, predicted_label):
+def get_confusion_matrix(y_test, predicted_score, threshold):
     '''
     Get True Negatives, False Positives, False Negatives and True Positives
 
     Inputs:
         y_test: real labels for testing set
-        predicted_label: predicted labels from the model
+        predicted_scores: array of predicted scores from model
         threshold: specified probability threshold to classify obs as positive
-
     Returns (true_negatives, false_positives, false_negatives, true_positives)
     '''
+    predicted_label = get_prediction_labels(predicted_score, threshold)
     c = sklearn.metrics.confusion_matrix(y_test, predicted_label)
     return c.ravel()
 
 
-def get_precision(y_test, predicted_label):
+def get_precision(y_test, predicted_score, threshold):
     '''
     Get precision score for the predicted labels
     
     Inputs:
         y_test: real labels for testing set
-        predicted_label: predicted labels from the model
-    
+        predicted_scores: array of predicted scores from model
+        threshold: specified probability threshold to classify obs as positive    
     Returns precision score
     '''
+    predicted_label = get_prediction_labels(predicted_score, threshold)
     return sklearn.metrics.precision_score(y_test, predicted_label)
     
 
 
-def get_recall(y_test, predicted_label):
+def get_recall(y_test, predicted_score, threshold):
     '''
     Get recall score for the predicted labels
     
     Inputs:
         y_test: real labels for testing set
-        predicted_label: predicted labels from the model
-        
+        predicted_scores: array of predicted scores from model
+        threshold: specified probability threshold to classify obs as positive        
     Returns recall score
     '''
+    predicted_label = get_prediction_labels(predicted_score, threshold)
     return sklearn.metrics.recall_score(y_test, predicted_label)
 
 
-def get_f1(y_test, predicted_label):
+def get_f1(y_test, predicted_score, threshold):
     '''
     Get f1 score score for the predicted labels
     
     Inputs:
         y_test: real labels for testing set
-        predicted_label: predicted labels from the model
-        
+        predicted_scores: array of predicted scores from model
+        threshold: specified probability threshold to classify obs as positive        
     Returns f1 score
     '''
+    predicted_label = get_prediction_labels(predicted_score, threshold)
     return sklearn.metrics.f1_score(y_test, predicted_label)
 
 
@@ -286,14 +317,12 @@ def evaluate_model(y_test, predicted_score, threshold):
     print("The true number positives is {}/{} from the data, with percentage {:.2f}%\n".format(
           sum(y_test), len(y_test), 100.*sum(y_test)/len(y_test)))
     print("Threshold: {}".format(threshold))
-    
-    pred_label = get_prediction_labels(predicted_score, threshold)
-    
-    print("    The total number of predicted positives is {}".format(sum(pred_label)))
-    print("    The accuracy is {:.2f}".format(get_accuracy_score(y_test, pred_label)))
-    print("    The precision is {:.2f}".format(get_precision(y_test, pred_label)))
-    print("    The recall is {:.2f}".format(get_recall(y_test, pred_label)))
-    print("    The f1 score is {:.2f}".format(get_f1(y_test, pred_label)))
+        
+    print("    The total number of predicted positives is {}".format(sum(get_prediction_labels(predicted_score, threshold))))
+    print("    The accuracy is {:.2f}".format(get_accuracy_score(y_test, predicted_score, threshold)))
+    print("    The precision is {:.2f}".format(get_precision(y_test, predicted_score, threshold)))
+    print("    The recall is {:.2f}".format(get_recall(y_test, predicted_score, threshold)))
+    print("    The f1 score is {:.2f}".format(get_f1(y_test, predicted_score, threshold)))
     print("    The area under the ROC is {:.2f}".format(get_auc(y_test, predicted_score)))
     print()
     
@@ -323,7 +352,7 @@ def selected_decision_tree(df, x_train, y_train, x_test, y_test,
     Visualize and get feature importance for the selected decision tree
     
     Inputs:
-        df: pandas dataframe with selected features
+        df: pandas dataframe
         x_train, y_train: training sets from the data
         x_test, y_test: testing sets from data
         y_col: (str) column name of target variable
@@ -340,10 +369,10 @@ def selected_decision_tree(df, x_train, y_train, x_test, y_test,
     scores = get_predicted_scores(dt, x_test)
     pred_label = get_prediction_labels(scores, threshold)
     
-    print("max_depth: {}, min_leaf: {}, criterion: {}".format(d, l, c))
+    print("max_depth: {}, min_leaf: {}, criterion: {}".format(max_depth, min_leaf, criterion))
     evaluate_model(y_test, pred_label, threshold)
 
-    graph = classifiers.visualize_tree(dt, get_labels(df, y_col), ['No', 'Yes'])
+    graph = classifiers.visualize_tree(dt, classifiers.get_labels(df, y_col), ['No', 'Yes'])
     display(SVG(graph.pipe(format='svg')))
     print(classifiers.feature_importance(df, y_col, dt))
     

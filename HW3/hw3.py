@@ -113,12 +113,10 @@ def hw3():
     # build models
     # evaluate models
     # create a table to tally the different results
-    dt = classifiers.build_decision_tree(x_train1, y_train1,
-                                         max_depth=10, min_leaf=100, criterion='gini')
-    pipeline.vary_threshold(dt, x_test1, y_test1, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-    pipeline.build_decision_trees(x_train1, y_train1, x_test1, y_test1, y_col, 0.45, [20,10,8,5,3], [1000,100,10])
                 
-
+    pipeline.build_decision_trees(x_train1, y_train1, x_test1, y_test1, y_col,
+                                  [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                                  [20,10,8,5,3], [1000,100,10])
 
 
 
