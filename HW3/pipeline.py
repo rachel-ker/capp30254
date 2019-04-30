@@ -1,8 +1,11 @@
 '''
 Homework 3
 Machine Learning Pipeline Functions
-This python file contains general functions to read, explore,
-preprocss data, generate features, build classifer, and evaluate classifier
+This python file contains general functions to do train-test splits,
+get predictions, and evaluate classifier
+
+etl.py contains functions to read, explore, clean data
+classifiers.py contains functions to build classifers
 
 Rachel Ker
 '''
@@ -20,9 +23,9 @@ import classifiers
 
 SEED = 0
 
-######################
-#  Build Classifier  #
-######################
+###########################
+#  Train and Test Splits  #
+###########################
 
 def split_training_testing(df, y_col, features, test_size):
     '''
@@ -70,40 +73,6 @@ def temporal_split(df, y_col, features, date_col,
     return x_train, x_test, y_train, y_test
 
 
-def build_decision_trees(x_train, y_train, x_test, y_test,
-                         y_col, threshold,
-                         max_depth, min_leaf, criterion=['entropy','gini']):
-    '''
-    Build and compare different decision tree models
-    
-    Inputs:
-        x_train, y_train: training sets from the data
-        x_test, y_test: testing sets from data
-        y_col: (str) column name of target variable
-        threshold: (list of threshold to test)
-        max_depth: (list of int) max depth of decision tree
-        min_leaf: (list of int) min sample in the leaf of decision tree
-        criterion: (list of str) optional, defaults to ['entropy','gini']
-
-    Returns a pandas dataframe summary of models and metrics
-    '''
-    df = pd.DataFrame()
-    
-    for d in max_depth:
-        for l in min_leaf:
-            for c in criterion:
-                dt = classifiers.build_decision_tree(x_train, y_train,
-                                                     max_depth=d, min_leaf=l,
-                                                     criterion=c)                                
-                dic = vary_threshold(dt, x_test, y_test, threshold)
-                dic["max_depth"] = [d] * len(threshold)
-                dic["min_leaf"] = [l] * len(threshold)
-                dic["criterion"] = [c] * len(threshold)
-                table = pd.DataFrame(data=dic)
-                df = df.append(table)
-    return df
-
-
 
 #######################
 #   Get Prediction    #
@@ -132,7 +101,7 @@ def get_predicted_scores_for_svm(svm_model, x_test):
         x_test: testing set features
     Returns an array of predicted scores
     '''
-    scores = model.decision_function(x_test)
+    scores = svm_model.decision_function(x_test)
     return scores
 
     
@@ -197,6 +166,8 @@ def vary_threshold(model, x_test, y_test, threshold, svm=False):
 #######################
 # Evaluate Classifier #
 #######################
+
+# General evaluation metrics
 
 def get_accuracy_score(y_test, predicted_score, threshold):
     '''
@@ -304,28 +275,6 @@ def plot_roc_curve(y_test, predicted_score, label):
     plt.show()
     # (Source: https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8)
 
-
-def evaluate_model(y_test, predicted_score, threshold):
-    '''
-    Prints accuracy, precision and recall scores
-
-    Inputs:
-        y_test: real labels for testing set
-        predicted_score: predicted score from predict proba/decision fn
-        threshold: specified probability threshold to classify obs as positive
-    '''
-    print("The true number positives is {}/{} from the data, with percentage {:.2f}%\n".format(
-          sum(y_test), len(y_test), 100.*sum(y_test)/len(y_test)))
-    print("Threshold: {}".format(threshold))
-        
-    print("    The total number of predicted positives is {}".format(sum(get_prediction_labels(predicted_score, threshold))))
-    print("    The accuracy is {:.2f}".format(get_accuracy_score(y_test, predicted_score, threshold)))
-    print("    The precision is {:.2f}".format(get_precision(y_test, predicted_score, threshold)))
-    print("    The recall is {:.2f}".format(get_recall(y_test, predicted_score, threshold)))
-    print("    The f1 score is {:.2f}".format(get_f1(y_test, predicted_score, threshold)))
-    print("    The area under the ROC is {:.2f}".format(get_auc(y_test, predicted_score)))
-    print()
-    
  
 def plot_precision_recall_curve(y_test, predicted_scores):
     '''
@@ -341,13 +290,99 @@ def plot_precision_recall_curve(y_test, predicted_scores):
     plt.show()
 
 
+# Getting Best models #
 
-# Evaluate Specific Chosen Classifiers #
+def best_model(df, metric):
+    '''
+    Identify best models for the specified metric
+    Inputs:
+        df: pandas dataframe
+        metric: (str) precision, recall, accuracy, f1_score, auc
+    
+    Return dataframe with best models
+    '''
+    return df[df[metric] == df[metric].max()]
+    
+
+# Evaluate Specific Classifiers #
+
+def build_knn_models(x_train, y_train, x_test, y_test,
+                     y_col, threshold, train_test_split,
+                     k, weight=['uniform', 'distance'], p=[1,2]):
+    '''
+    Build and compare different knn models
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        k: (list of int) number of neighbors
+        weight: (list of str) optional
+        p: (list of int) optional
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+ 
+    for n in k:
+        for w in weight:
+            for num in p:
+                knn = classifiers.build_knn(x_train, y_train, k=n, weight=w, p=num)
+
+                if num==1:
+                    dist = "Manhatten"
+                elif num==2:
+                    dist = "Euclidean"
+                
+                dic = vary_threshold(knn, x_test, y_test, threshold)
+                dic["model"] = "k-nn - k: {}, weight: {}, dist: {}".format(n, w, dist)
+                dic["train_test_split"] = train_test_split
+
+                table = pd.DataFrame(data=dic)
+                df = df.append(table)
+    return df    
+    
+
+
+def build_decision_trees(x_train, y_train, x_test, y_test,
+                         y_col, threshold, train_test_split,
+                         max_depth, min_leaf, criterion=['entropy','gini']):
+    '''
+    Build and compare different decision tree models
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        max_depth: (list of int) max depth of decision tree
+        min_leaf: (list of int) min sample in the leaf of decision tree
+        criterion: (list of str) optional, defaults to ['entropy','gini']
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+    
+    for d in max_depth:
+        for l in min_leaf:
+            for cr in criterion:
+                dt = classifiers.build_decision_tree(x_train, y_train,
+                                                     cr, d, l)                                
+                dic = vary_threshold(dt, x_test, y_test, threshold)
+                dic["model"] = "decision tree - max_depth: {}, min_leaf: {}, criterion: {}".format(d, l, cr)
+                dic["train_test_split"] = train_test_split
+                table = pd.DataFrame(data=dic)
+                df = df.append(table)
+    return df
 
 
 def selected_decision_tree(df, x_train, y_train, x_test, y_test,
-                           y_col, threshold,
-                           max_depth, min_leaf, criterion):
+                           y_col, threshold, 
+                           max_depth, min_leaf, criterion,
+                           feature_labels, class_labels):
     '''
     Visualize and get feature importance for the selected decision tree
     
@@ -370,10 +405,97 @@ def selected_decision_tree(df, x_train, y_train, x_test, y_test,
     pred_label = get_prediction_labels(scores, threshold)
     
     print("max_depth: {}, min_leaf: {}, criterion: {}".format(max_depth, min_leaf, criterion))
-    evaluate_model(y_test, pred_label, threshold)
-
-    graph = classifiers.visualize_tree(dt, classifiers.get_labels(df, y_col), ['No', 'Yes'])
+    graph = classifiers.visualize_tree(dt, feature_labels, class_labels)
     display(SVG(graph.pipe(format='svg')))
-    print(classifiers.feature_importance(df, y_col, dt))
+    print(classifiers.feature_importance(dt, y_col, feature_labels))
+
+
+
+def build_logistic_regressions(x_train, y_train, x_test, y_test,
+                               y_col, threshold, train_test_split,
+                               c, penalty=['l1','l2']):
+    '''
+    Build and compare different logistic regression models
     
-                         
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        c: (list of positive floats) strength of regularization;
+        smaller values are stronger regularization      
+        penalty: (list of str) optional
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+    
+    for flt in c:
+        for p in penalty:
+            lr = classifiers.build_logistic_regression(x_train, y_train,
+                                                       penalty=p, c=flt)                                
+            dic = vary_threshold(lr, x_test, y_test, threshold)
+            dic["model"] = "logistic regression - penalty: {}, c: {}".format(p, flt)
+            dic["train_test_split"] = train_test_split
+            table = pd.DataFrame(data=dic)
+            df = df.append(table)
+    return df    
+
+
+def build_svm_models(x_train, y_train, x_test, y_test,
+                    y_col, threshold, train_test_split, c):
+    '''
+    Build and compare different SVM models
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        c: (list of positive floats) strength of regularization;
+        smaller values are stronger regularization         
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+
+    for flt in c:
+        svm = classifiers.build_svm(x_train, y_train, c=flt)                                
+        dic = vary_threshold(svm, x_test, y_test, threshold, svm=True)
+        dic["model"] = "SVM - c: {}".format(flt)
+        dic["train_test_split"] = train_test_split
+        table = pd.DataFrame(data=dic)
+        df = df.append(table)
+    return df
+
+
+def build_all_models(x_train, y_train, x_test, y_test,
+                     y_col, threshold, train_test_split,
+                     k, max_depth, min_leaf, c):
+
+    models = pd.DataFrame()
+    dt = build_decision_trees(x_train, y_train, x_test, y_test, y_col,
+                              threshold, train_test_split, max_depth, min_leaf)
+    
+    knn = build_knn_models(x_train, y_train, x_test, y_test, y_col,
+                           threshold, train_test_split, k)
+    
+    lr = build_logistic_regressions(x_train, y_train, x_test, y_test, y_col,
+                                    threshold, train_test_split, c)
+    
+    svm = build_svm_models(x_train, y_train, x_test, y_test, y_col,
+                           threshold, train_test_split, c)
+
+    tables = [dt, knn, lr, svm]
+    for table in tables:
+        models= models.append(table)
+
+    print("Best Models for " + train_test_split)
+    print("precision", best_model(models, 'precision'))
+    print("recall", best_model(models, 'recall'))
+    
+    return models
+    
+

@@ -16,6 +16,7 @@ from mlxtend.plotting import plot_decision_regions
 
 SEED = 0
 
+
 #######################
 # K-nearest neighbors #
 #######################
@@ -34,8 +35,8 @@ def build_knn(x_train, y_train, k, weight, p=2, dist='minkowski'):
     '''
     knn = KNeighborsClassifier(n_neighbors=k,
                                weights=weight,
-                               metric='minkowski',
-                               random_state=SEED)
+                               p=p,
+                               metric=dist)
     knn.fit(x_train, y_train)
     return knn
 
@@ -96,32 +97,22 @@ def visualize_tree(dt, feature_labels, class_labels, file=None):
     # (Source: https://towardsdatascience.com/interactive-visualization-of-decision-trees-with-jupyter-widgets-ca15dd312084)
 
 
-def feature_importance(df, y_col, dt):
+def feature_importance(dt, y_col, features):
     '''
     Get the feature importance of each feature
     Inputs:
-        df: pandas dataframe
-        y_col: (str) column name of target variable
         dt: decision tree
+        y_col: (str) column name of target variable
+        feature: a list of labels for features
     Return a dataframe of feature importance
     '''
-    d = {'Features': get_labels(df, y_col),
+    d = {'Features': features,
          'Importance': dt.feature_importances_}
     feature_importance = pd.DataFrame(data=d)
     feature_importance = feature_importance.sort_values(by=['Importance'],
                                                         ascending=False)
     return feature_importance
     
-    
-def get_labels(df, y_col):
-    '''
-    Get feature labels
-    Inputs:
-        df: pandas dataframe
-        y_col: (str) column name of target variable
-    Return a list of feature labels
-    '''
-    return df.loc[:,df.columns != y_col].columns
 
 
 #######################
@@ -250,8 +241,6 @@ def build_bagging(x_train, y_train, base_model, n, max_samples, max_features):
     bag.fit(x_train, y_train)
     return bag
                             
-
-
 
 ##########################
 #       Boosting         #
