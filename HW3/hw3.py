@@ -14,7 +14,6 @@ import classifiers
 from sklearn.tree import DecisionTreeClassifier
 
 
-
 ## Chosen Parameters for this code ##
 filename = "data/projects_2012_2013.csv"
 y_col = "notfullyfundedin60days"
@@ -27,7 +26,7 @@ dummies = ['total_price_including_optional_support_discrete', 'students_reached_
 
 
 features = ['total_price_including_optional_support_discrete_245_to_510','total_price_including_optional_support_discrete_510_to_753',
- 'total_price_including_optional_support_discrete_753_to_164383.84', 'students_reached_discrete_31.0_to_12144.0',
+ 'total_price_including_optional_support_discrete_753_to_164383.84', 'students_reached_discrete_31.0_to_12144.0', 
  'school_state_AL', 'school_state_AR', 'school_state_AZ', 'school_state_CA', 'school_state_CO', 'school_state_CT',
  'school_state_DC', 'school_state_DE', 'school_state_FL', 'school_state_GA', 'school_state_HI', 'school_state_IA',
  'school_state_ID', 'school_state_IL', 'school_state_IN', 'school_state_KS', 'school_state_KY', 'school_state_LA',
@@ -125,6 +124,8 @@ def hw3():
 
     for d in dummies:
         df = etl.create_dummies(df, d)
+
+    print(etl.check_missing(df)[etl.check_missing(df)['missing count'] > 0])
 
     # Temporal splits     
     x_train1, x_test1, y_train1, y_test1 = pipeline.temporal_split(df, y_col, features, date_col,

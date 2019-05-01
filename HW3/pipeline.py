@@ -390,6 +390,7 @@ def build_knn_models(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building k-nn models...")
     df = pd.DataFrame()
  
     for n in k:
@@ -430,6 +431,8 @@ def build_decision_trees(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building decision tree models...")
+
     df = pd.DataFrame()
     
     for d in max_depth:
@@ -494,6 +497,8 @@ def build_logistic_regressions(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building logistic regressions...")
+
     df = pd.DataFrame()
     
     for flt in c:
@@ -524,6 +529,8 @@ def build_svm_models(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building svm models...")
+
     df = pd.DataFrame()
 
     for flt in c:
@@ -556,6 +563,8 @@ def build_ada_boostings(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building adaboost models...")
+
     df = pd.DataFrame()
     
     for m in base_model:
@@ -585,6 +594,8 @@ def build_gradient_boostings(x_train, y_train, x_test, y_test,
     
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building gradient boosting models...")
+
     df = pd.DataFrame()
     
     for n in n_estimators:
@@ -615,9 +626,11 @@ def build_bagging_models(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building bagging models...")
+
     df = pd.DataFrame()
 
-    for m in models:
+    for m in base_model:
         for n in n_estimators:
             for job in n_jobs:
                 bag = classifiers.build_bagging(x_train, y_train, m, n, job)                                
@@ -651,6 +664,8 @@ def build_random_forests(x_train, y_train, x_test, y_test,
 
     Returns a pandas dataframe summary of models and metrics
     '''
+    print("building random forest models...")
+
     df = pd.DataFrame()
 
     for n in n_estimators:
@@ -703,6 +718,7 @@ def build_all_models(x_train, y_train, x_test, y_test,
     gbm = build_gradient_boostings(x_train, y_train, x_test, y_test, y_col,
                               threshold, train_test_split, n_estimators)
 
+    print('done with model building')
     tables = [dt, knn, lr, svm, rf, bag, ada, gbm]
     
     for table in tables:
