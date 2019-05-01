@@ -12,6 +12,9 @@ import pipeline
 import classifiers
 
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.exceptions import UndefinedMetricWarning
+import warnings
+warnings.filterwarnings(action='ignore', category=UndefinedMetricWarning)
 
 
 ## Chosen Parameters for this code ##
@@ -26,7 +29,7 @@ dummies = ['total_price_including_optional_support_discrete', 'students_reached_
 
 
 features = ['total_price_including_optional_support_discrete_245_to_510','total_price_including_optional_support_discrete_510_to_753',
- 'total_price_including_optional_support_discrete_753_to_164383.84', 'students_reached_discrete_31.0_to_12144.0', 
+ 'total_price_including_optional_support_discrete_753_to_164383.84', 'students_reached_discrete_31_to_12144.0', 
  'school_state_AL', 'school_state_AR', 'school_state_AZ', 'school_state_CA', 'school_state_CO', 'school_state_CT',
  'school_state_DC', 'school_state_DE', 'school_state_FL', 'school_state_GA', 'school_state_HI', 'school_state_IA',
  'school_state_ID', 'school_state_IL', 'school_state_IN', 'school_state_KS', 'school_state_KY', 'school_state_LA',
@@ -85,15 +88,14 @@ train3_label = "jan12-jun13/jul13-dec13"
 
 # Model Building Parameters
 thresholds = [0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5]
-neighbors = [3,10,50]
+neighbors = [3,10]
 max_depth = [4,6,8]
-min_leaf = [100, 200, 500]
-c = [0.01, 0.1, 0.5]
+min_leaf = [100]
+c = [0.01, 0.1]
 n_estimators = [10,20,50]
 base_model_bag = [DecisionTreeClassifier(max_depth=5)]
 base_model_ada = [DecisionTreeClassifier(max_depth=1)]
 n_jobs = [10]
-
 
 
 
@@ -119,8 +121,8 @@ def hw3():
     df = etl.replace_missing_with_mean(df, ['students_reached'])
 
     # Create dummy variables
-    df = etl.discretize(df, 'total_price_including_optional_support', [92.0, 245.81, 510.5, 752.96])
-    df = etl.discretize(df, 'students_reached', [1.0, 31.0])
+    df = etl.discretize(df, 'total_price_including_optional_support', [92, 245, 510, 753])
+    df = etl.discretize(df, 'students_reached', [1, 31])
 
     for d in dummies:
         df = etl.create_dummies(df, d)

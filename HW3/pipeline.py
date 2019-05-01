@@ -272,17 +272,21 @@ def random_baseline(x_test):
     return random_predicted
 
 
-def plot_roc_curve(y_test, predicted_score, label):
+def plot_roc_curve(y_test, predicted_scores, labels):
     '''
-    Plot the ROC curve
+    Plot the ROC curves
     Inputs:
-        y_test: real labels for testing set
-        predicted_score: predicted score from predict proba/decision fn
-        label: (str) model specifications
+        y_test: testing set
+        predicted_scores: list of predicted score from predict proba/decision fn
+        labels: (list of str) title for plots
     '''
-    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test, predicted_score)
     plt.figure()
-    plt.plot(fpr, tpr, label=label + ' (area = {:.2f})'.format(get_auc(y_test, predicted_score)))
+
+    for scores in predicted_scores:
+        for label in labels:
+            fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test, scores)
+            plt.plot(fpr, tpr, label=label + ' (area = {:.2f})'.format(get_auc(y_test, scores)))
+
     plt.plot([0, 1], [0, 1],'r--')
     plt.xlim([0.0, 1.0])
     plt.ylim([0.0, 1.0])
@@ -290,37 +294,37 @@ def plot_roc_curve(y_test, predicted_score, label):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
-    plt.savefig(label+'_ROC')
+    plt.savefig('ROC curves')
     plt.show()
     # (Source: https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8)
 
  
-def plot_precision_recall_curve(model, y_test, predicted_scores, model_name):
+def plot_precision_recall_curve(y_test, predicted_scores, model_names):
     '''
     Plot precision and recall curves for the predicted labels
     
     Inputs:
-        model: classifier object
-        y_test: real labels for testing set
-        predicted_scores: array of predicted scores from model
-        model_name: (str) title for plot
-
+        y_test: testing set
+        predicted_scores: list of predicted score from predict proba/decision fn
+        model_names: (list of str) title for plots
     '''
-    precision, recall, thresholds = sklearn.metrics.precision_recall_curve(y_test,
-                                                                           predicted_scores)
-    plt.plot(recall, precision, marker='.', label=model_name)
+    for scores in predicted_scores:
+        for m_name in model_names:
+            precision, recall, thresholds = sklearn.metrics.precision_recall_curve(y_test, scores)
+            plt.plot(recall, precision, marker='.', label=m_name)
+    
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.title('Precision-Recall Curve')
+    plt.savefig('precision recall curve')
     plt.show()
 
 
-def plot_precision_recall_n(model, y_true, y_prob, model_name):
+def plot_precision_recall_n(y_true, y_prob, model_name):
     '''
     Plot precision and recall for each threshold
 
     Inputs:
-        model: classifier object
         y_true: real labels for testing set
         y_prob: array of predicted scores from model
         model_name: (str) title for plot
@@ -352,6 +356,8 @@ def plot_precision_recall_n(model, y_true, y_prob, model_name):
     plt.legend([l1,l2],['precision','recall'], loc=2)
 
     plt.title(model_name)
+    plt.savefig(model_name + 'precision_recall_threshold')
+
     plt.show()
     # (Source: https://github.com/dssg/hitchhikers-guide/blob/master/sources/curriculum/3_modeling_and_machine_learning/machine-learning/machine_learning_clean.ipynb)
 
@@ -369,6 +375,7 @@ def best_model(df, metric):
     '''
     return df[df[metric] == df[metric].max()]
     
+
 
 # Evaluate Specific Classifiers #
 
