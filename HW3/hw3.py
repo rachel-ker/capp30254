@@ -139,9 +139,8 @@ def hw3():
                                                                    train3_start_date, train3_end_date,
                                                                    test3_start_date, test3_end_date)
 
+    # Build Models
     all_tables = pd.DataFrame()
-
-    tables = []
 
     table1 = pipeline.build_all_models(x_train1, y_train1, x_test1, y_test1, y_col, thresholds,
                               train1_label, neighbors, max_depth, min_leaf, c, n_estimators,
