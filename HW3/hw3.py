@@ -11,6 +11,9 @@ import etl
 import pipeline
 import classifiers
 
+from sklearn.tree import DecisionTreeClassifier
+
+
 
 ## Chosen Parameters for this code ##
 filename = "data/projects_2012_2013.csv"
@@ -87,6 +90,10 @@ neighbors = [3,10,50]
 max_depth = [4,6,8]
 min_leaf = [100, 200, 500]
 c = [0.01, 0.1, 0.5]
+n_estimators = [10,20,50]
+base_model_bag = [DecisionTreeClassifier(max_depth=5)]
+base_model_ada = [DecisionTreeClassifier(max_depth=1)]
+n_jobs = [10]
 
 
 
@@ -134,19 +141,26 @@ def hw3():
 
     all_tables = pd.DataFrame()
 
+    tables = []
+
     table1 = pipeline.build_all_models(x_train1, y_train1, x_test1, y_test1, y_col, thresholds,
-                              train1_label, neighbors, max_depth, min_leaf, c)
+                              train1_label, neighbors, max_depth, min_leaf, c, n_estimators,
+                              base_model_bag, base_model_ada, n_jobs)
 
     table2 = pipeline.build_all_models(x_train2, y_train2, x_test2, y_test2, y_col, thresholds,
-                              train2_label, neighbors, max_depth, min_leaf, c)
+                              train2_label, neighbors, max_depth, min_leaf, c, n_estimators,
+                              base_model_bag, base_model_ada, n_jobs)
 
     table3 = pipeline.build_all_models(x_train3, y_train3, x_test3, y_test3, y_col, thresholds,
-                              train3_label, neighbors, max_depth, min_leaf, c)
+                              train3_label, neighbors, max_depth, min_leaf, c, n_estimators,
+                              base_model_bag, base_model_ada, n_jobs)
+
     tables = [table1, table2, table3]
 
     for table in tables:
         all_tables = all_tables.append(table)
 
+    all_tables.to_csv("all_models_evaluated.csv")
     return all_tables
     
 

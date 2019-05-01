@@ -9,7 +9,8 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import tree
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
-from sklearn.ensemble import BaggingClassifier, GradientBoostingClassifier, RandomForestClassifier
+from sklearn.ensemble import (RandomForestClassifier, BaggingClassifier, GradientBoostingClassifier, 
+AdaBoostClassifier)
 
 import graphviz
 from mlxtend.plotting import plot_decision_regions
@@ -222,21 +223,19 @@ def build_random_forest(x_train, y_train, n, criterion, max_depth, min_leaf):
 #       Bagging          #
 ##########################
 
-def build_bagging(x_train, y_train, base_model, n, max_samples, max_features):
+def build_bagging(x_train, y_train, base_model, n, n_jobs):
     '''
     Build a Bagging classifier
     Inputs:
         x_train, y_train: training sets for features and labels
-        base_estimator: classifier object
+        base_model: classifier object
         n: number of base estimator in the ensemble
-        max_samples: (int) number of samples to draw from X to train each base estimator
-        max_features: (int) number of features to draw from X to train each base estimator
+        n_jobs: (int) number of jobs to run in parallel
     Returns classifier object
     '''
     bag = BaggingClassifier(base_estimator=base_model,
-                            n_estimator=n,
-                            max_samples=max_samples,
-                            max_features=max_features,
+                            n_estimators=n,
+                            n_jobs=n_jobs,
                             random_state=SEED)
     bag.fit(x_train, y_train)
     return bag
@@ -246,17 +245,33 @@ def build_bagging(x_train, y_train, base_model, n, max_samples, max_features):
 #       Boosting         #
 ##########################
 
-def build_gradient_boosting(x_train, y_train, n, max_depth):
+def build_ada_boosting(x_train, y_train, base, n):
     '''
     Build a gradient boosting classifier
     Inputs:
         x_train, y_train: training sets for features and labels
-        n: number of trees in the forest
-        max_depth: (int) max depth of decision tree
+        base: classifier object
+        n: number of base estimator in the ensemble
     Returns classifier object  
     '''
-    gbc = GradientBoostingClassifier(n_estimator=n,
-                                     max_depth=max_depth,
+    ada = AdaBoostClassifier(base_estimator=base,
+                             n_estimators=n,
+                             random_state=SEED)
+    ada.fit(x_train, y_train)
+    return ada
+
+
+def build_gradient_boosting(x_train, y_train, n):
+    '''
+    Build a gradient boosting classifier
+    Inputs:
+        x_train, y_train: training sets for features and labels
+        n: number of base estimator in the ensemble
+    Returns classifier object  
+    '''
+    gbc = GradientBoostingClassifier(n_estimators=n,
                                      random_state=SEED)
+    gbc.fit(x_train, y_train)
+    return gbc
 
 # Good read: https://medium.com/@rrfd/boosting-bagging-and-stacking-ensemble-methods-with-sklearn-and-mlens-a455c0c982de

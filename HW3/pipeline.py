@@ -12,6 +12,7 @@ Rachel Ker
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 import sklearn.metrics
@@ -103,6 +104,14 @@ def get_predicted_scores_for_svm(svm_model, x_test):
     '''
     scores = svm_model.decision_function(x_test)
     return scores
+
+
+def get_score_distribution(pred_score):
+    '''
+    Plot predicted score distributions
+    '''
+    sns.distplot(pred_score, kde=False, rug=False)
+    plt.show()
 
     
 def get_prediction_labels(predicted_scores, threshold):
@@ -253,6 +262,15 @@ def get_auc(y_test, predicted_score):
     '''
     return sklearn.metrics.roc_auc_score(y_test, predicted_score)
 
+def random_baseline(x_test):
+    '''
+    Get random predictions
+    '''
+    random_score = [random.uniform(0,1) for i in enumerate(x_test)]
+    calc_threshold = lambda x, y: 0 if x < y else 1 
+    random_predicted = np.array( [calc_threshold(score, 0.5) for score in random_score] )
+    return random_predicted
+
 
 def plot_roc_curve(y_test, predicted_score, label):
     '''
@@ -262,6 +280,7 @@ def plot_roc_curve(y_test, predicted_score, label):
         predicted_score: predicted score from predict proba/decision fn
         label: (str) model specifications
     '''
+    fpr, tpr, thresholds = sklearn.metrics.roc_curve(y_test, predicted_score)
     plt.figure()
     plt.plot(fpr, tpr, label=label + ' (area = {:.2f})'.format(get_auc(y_test, predicted_score)))
     plt.plot([0, 1], [0, 1],'r--')
@@ -276,18 +295,65 @@ def plot_roc_curve(y_test, predicted_score, label):
     # (Source: https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8)
 
  
-def plot_precision_recall_curve(y_test, predicted_scores):
+def plot_precision_recall_curve(model, y_test, predicted_scores, model_name):
     '''
     Plot precision and recall curves for the predicted labels
     
     Inputs:
+        model: classifier object
         y_test: real labels for testing set
         predicted_scores: array of predicted scores from model
+        model_name: (str) title for plot
 
     '''
-    precision, recall, thresholds = precision_recall_curve(y_test, predicted_scores)
-    plt.plot(recall, precision, marker='.')
+    precision, recall, thresholds = sklearn.metrics.precision_recall_curve(y_test,
+                                                                           predicted_scores)
+    plt.plot(recall, precision, marker='.', label=model_name)
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title('Precision-Recall Curve')
     plt.show()
+
+
+def plot_precision_recall_n(model, y_true, y_prob, model_name):
+    '''
+    Plot precision and recall for each threshold
+
+    Inputs:
+        model: classifier object
+        y_true: real labels for testing set
+        y_prob: array of predicted scores from model
+        model_name: (str) title for plot
+    '''
+    y_score = y_prob
+    precision_curve, recall_curve, pr_thresholds = sklearn.metrics.precision_recall_curve(y_true, y_score)
+    precision_curve = precision_curve[:-1]
+    recall_curve = recall_curve[:-1]
+
+    pct_above_per_thresh = []
+    number_scored = len(y_score)
+    for value in pr_thresholds:
+        num_above_thresh = len(y_score[y_score>=value])
+        pct_above_thresh = num_above_thresh / float(number_scored)
+        pct_above_per_thresh.append(pct_above_thresh)
+
+    pct_above_per_thresh = np.array(pct_above_per_thresh)
+    
+    fig, ax1 = plt.subplots()
+    l1,=ax1.plot(pct_above_per_thresh, precision_curve, 'b')
+    ax1.set_xlabel('percent of population')
+    ax1.set_ylim(0,1.05)
+    ax2 = ax1.twinx().twiny()
+    l2,=ax2.plot(pct_above_per_thresh, recall_curve, 'r')
+    ax2.set_xlabel('threshold')
+    ax2.set_xticks(pr_thresholds, ['0.0','0.1','0.2','0.3','0.4','0.5',
+                                   '0.6','0.7','0.8','0.9','1.0'])
+    ax2.set_ylim(0,1.05)
+    plt.legend([l1,l2],['precision','recall'], loc=2)
+
+    plt.title(model_name)
+    plt.show()
+    # (Source: https://github.com/dssg/hitchhikers-guide/blob/master/sources/curriculum/3_modeling_and_machine_learning/machine-learning/machine_learning_clean.ipynb)
 
 
 # Getting Best models #
@@ -463,6 +529,8 @@ def build_svm_models(x_train, y_train, x_test, y_test,
     for flt in c:
         svm = classifiers.build_svm(x_train, y_train, c=flt)                                
         dic = vary_threshold(svm, x_test, y_test, threshold, svm=True)
+        # think about how to vary threshold for svm
+        
         dic["model"] = "SVM - c: {}".format(flt)
         dic["train_test_split"] = train_test_split
         table = pd.DataFrame(data=dic)
@@ -470,9 +538,139 @@ def build_svm_models(x_train, y_train, x_test, y_test,
     return df
 
 
+def build_ada_boostings(x_train, y_train, x_test, y_test,
+                       y_col, threshold, train_test_split,
+                       base_model, n_estimators):
+    '''
+    Build and compare different Ada boosting models
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        base_model: (list of models)
+        n_estimators: (list of int) number of base estimators
+    
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+    
+    for m in base_model:
+        for n in n_estimators:
+            ada = classifiers.build_ada_boosting(x_train, y_train, base=m, n=n)                                
+            dic = vary_threshold(ada, x_test, y_test, threshold)
+            dic["model"] = "AdaBoosting - base_model: {}, n_estimators: {}".format(m,n)
+            dic["train_test_split"] = train_test_split
+            table = pd.DataFrame(data=dic)
+            df = df.append(table)
+    return df 
+
+
+def build_gradient_boostings(x_train, y_train, x_test, y_test,
+                            y_col, threshold, train_test_split,
+                            n_estimators):
+    '''
+    Build and compare different Gradient boosting models
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        n_estimators: (list of int) number of base estimators    
+    
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+    
+    for n in n_estimators:
+        gbm = classifiers.build_gradient_boosting(x_train, y_train, n=n)                                
+        dic = vary_threshold(gbm, x_test, y_test, threshold)
+        dic["model"] = "Gradient Boosting - n_estimators: {}".format(n)
+        dic["train_test_split"] = train_test_split
+        table = pd.DataFrame(data=dic)
+        df = df.append(table)
+    return df 
+
+
+def build_bagging_models(x_train, y_train, x_test, y_test,
+                        y_col, threshold, train_test_split,
+                        base_model, n_estimators, n_jobs):
+    '''
+    Build and compare different Bagging Classifiers
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        base_model: (list of models)
+        n_estimators: (list of int) number of trees in the forest
+        n_jobs: (int) number of jobs to run in parallel
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+
+    for m in models:
+        for n in n_estimators:
+            for job in n_jobs:
+                bag = classifiers.build_bagging(x_train, y_train, m, n, job)                                
+                dic = vary_threshold(bag, x_test, y_test, threshold)
+                dic["model"] = "bagging - base_model: {}, n_estimator: {}, \
+                                n_jobs: {}".format(m, n, job)
+                dic["train_test_split"] = train_test_split
+                table = pd.DataFrame(data=dic)
+                df = df.append(table)
+    return df
+
+
+
+def build_random_forests(x_train, y_train, x_test, y_test,
+                        y_col, threshold, train_test_split,
+                        n_estimators, max_depth, min_leaf,
+                        criterion=['entropy', 'gini']):
+    '''
+    Build and compare different Random Forests
+    
+    Inputs:
+        x_train, y_train: training sets from the data
+        x_test, y_test: testing sets from data
+        y_col: (str) column name of target variable
+        threshold: (list of threshold to test)
+        train_test_split: (str) label for the different splits
+        n_estimators: (list of int) number of trees in the forest
+        max_depth: (list of int) max depth of decision tree
+        min_leaf: (list of int) min sample in the leaf of decision tree
+        criterion: (list of str) optional, defaults to ['entropy','gini'] 
+
+    Returns a pandas dataframe summary of models and metrics
+    '''
+    df = pd.DataFrame()
+
+    for n in n_estimators:
+        for d in max_depth:
+            for l in min_leaf:
+                for cr in criterion:
+                    rf = classifiers.build_random_forest(x_train, y_train, n, cr, d, l)                                
+                    dic = vary_threshold(rf, x_test, y_test, threshold)
+                    dic["model"] = "random forest - n_estimator: {}, max_depth: {}, \
+                                    min_leaf: {}, criterion: {}".format(n, d, l, cr)
+                    dic["train_test_split"] = train_test_split
+                    table = pd.DataFrame(data=dic)
+                    df = df.append(table)
+    return df
+
+
 def build_all_models(x_train, y_train, x_test, y_test,
                      y_col, threshold, train_test_split,
-                     k, max_depth, min_leaf, c):
+                     k, max_depth, min_leaf, c, n_estimators,
+                     base_model_bag, base_model_ada, n_jobs):
     '''
     Build Decision Trees, K-nearest neighbors, logistic regression, SVM
     for the train and test set at the different parameters
@@ -491,13 +689,24 @@ def build_all_models(x_train, y_train, x_test, y_test,
     svm = build_svm_models(x_train, y_train, x_test, y_test, y_col,
                            threshold, train_test_split, c)
 
-    tables = [dt, knn, lr, svm]
+    rf = build_random_forests(x_train, y_train, x_test, y_test, y_col,
+                              threshold, train_test_split, n_estimators, max_depth, min_leaf)
+
+    bag = build_bagging_models(x_train, y_train, x_test, y_test, y_col,
+                              threshold, train_test_split, base_model_bag,
+                              n_estimators, n_jobs)
+
+    ada = build_ada_boostings(x_train, y_train, x_test, y_test, y_col,
+                              threshold, train_test_split, base_model_ada,
+                              n_estimators)
+
+    gbm = build_gradient_boostings(x_train, y_train, x_test, y_test, y_col,
+                              threshold, train_test_split, n_estimators)
+
+    tables = [dt, knn, lr, svm, rf, bag, ada, gbm]
+    
     for table in tables:
         models= models.append(table)
-
-    print("Best Models for " + train_test_split)
-    print("precision", best_model(models, 'precision'))
-    print("recall", best_model(models, 'recall'))
     
     return models
     
