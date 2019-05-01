@@ -10,6 +10,8 @@ classifiers.py - code to build each specific classifier
   
 hw3-writeup.pdf - short report on findings  
 hw3.py - code applied to donorschoose data  
+hw3.ipynb - jupyter notebook version of the code  
+Missing data exploration.ipynb - exploration of missing data  
   
 requirements.txt - required libraries and versions  
   
