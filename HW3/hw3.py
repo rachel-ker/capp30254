@@ -16,13 +16,15 @@ import classifiers
 filename = "data/projects_2012_2013.csv"
 y_col = "notfullyfundedin60days"
 
-dummies = ['school_state', 'school_metro', 'school_charter', 'school_magnet', 'teacher_prefix',
+dummies = ['total_price_including_optional_support_discrete', 'students_reached_discrete',
+           'school_state', 'school_metro', 'school_charter', 'school_magnet', 'teacher_prefix',
            'primary_focus_subject', 'primary_focus_area', 'secondary_focus_subject',
            'secondary_focus_area', 'resource_type', 'poverty_level', 'grade_level',
            'eligible_double_your_impact_match']
 
 
-features = ['school_latitude', 'school_longitude', 'total_price_including_optional_support', 'students_reached',
+features = ['total_price_including_optional_support_discrete_245_to_510','total_price_including_optional_support_discrete_510_to_753',
+ 'total_price_including_optional_support_discrete_753_to_164383.84', 'students_reached_discrete_31.0_to_12144.0',
  'school_state_AL', 'school_state_AR', 'school_state_AZ', 'school_state_CA', 'school_state_CO', 'school_state_CT',
  'school_state_DC', 'school_state_DE', 'school_state_FL', 'school_state_GA', 'school_state_HI', 'school_state_IA',
  'school_state_ID', 'school_state_IL', 'school_state_IN', 'school_state_KS', 'school_state_KY', 'school_state_LA',
@@ -41,7 +43,7 @@ features = ['school_latitude', 'school_longitude', 'total_price_including_option
  'primary_focus_subject_Literature & Writing', 'primary_focus_subject_Mathematics', 'primary_focus_subject_Music',
  'primary_focus_subject_Nutrition', 'primary_focus_subject_Other', 'primary_focus_subject_Parent Involvement',
  'primary_focus_subject_Performing Arts', 'primary_focus_subject_Social Sciences', 'primary_focus_subject_Special Needs',
- 'pimary_focus_subject_Sports', 'primary_focus_subject_Visual Arts', 'primary_focus_area_Health & Sports', 'primary_focus_area_History & Civics',
+ 'primary_focus_subject_Sports', 'primary_focus_subject_Visual Arts', 'primary_focus_area_Health & Sports', 'primary_focus_area_History & Civics',
  'primary_focus_area_Literacy & Language', 'primary_focus_area_Math & Science', 'primary_focus_area_Music & The Arts', 'primary_focus_area_Special Needs',
  'secondary_focus_subject_Civics & Government', 'secondary_focus_subject_College & Career Prep', 'secondary_focus_subject_Community Service',
  'secondary_focus_subject_ESL', 'secondary_focus_subject_Early Development', 'secondary_focus_subject_Economics',
@@ -111,6 +113,9 @@ def hw3():
     df = etl.replace_missing_with_mean(df, ['students_reached'])
 
     # Create dummy variables
+    df = etl.discretize(df, 'total_price_including_optional_support', [92.0, 245.81, 510.5, 752.96])
+    df = etl.discretize(df, 'students_reached', [1.0, 31.0])
+
     for d in dummies:
         df = etl.create_dummies(df, d)
 
@@ -126,8 +131,6 @@ def hw3():
     x_train3, x_test3, y_train3, y_test3 = pipeline.temporal_split(df, y_col, features, date_col,
                                                                    train3_start_date, train3_end_date,
                                                                    test3_start_date, test3_end_date)
-
-    all_tables = pd.DataFrame()
 
     all_tables = pd.DataFrame()
 

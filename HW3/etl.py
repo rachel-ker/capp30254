@@ -239,6 +239,7 @@ def discretize(df, continuous_var, lower_bounds):
     min_val = df[continuous_var].min()
     assert lower_bounds[0] == min_val
     max_val = df[continuous_var].max()
+    print("min_val:{}, max_val:{}".format(min_val, max_val))
 
     lower_bounds = lower_bounds + [max_val+1]
 
@@ -247,10 +248,11 @@ def discretize(df, continuous_var, lower_bounds):
     for i in range(len(lower_bounds)-1):
         key = str(lower_bounds[i]) + "_to_" + str(lower_bounds[i+1])
         replace_dict[key] = lower_bounds[i]
+    print(replace_dict)
 
     df[continuous_var + "_discrete"] = pd.cut(df[continuous_var],
                                               right=False,
-                                              bins=list(replace_dict.values()) + [max_val],
+                                              bins=list(replace_dict.values()) + [max_val+1],
                                               labels=list(replace_dict.keys()),
                                               include_lowest=True)
     return df
