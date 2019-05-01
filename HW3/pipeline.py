@@ -369,8 +369,7 @@ def build_decision_trees(x_train, y_train, x_test, y_test,
     for d in max_depth:
         for l in min_leaf:
             for cr in criterion:
-                dt = classifiers.build_decision_tree(x_train, y_train,
-                                                     cr, d, l)                                
+                dt = classifiers.build_decision_tree(x_train, y_train, cr, d, l)                                
                 dic = vary_threshold(dt, x_test, y_test, threshold)
                 dic["model"] = "decision tree - max_depth: {}, min_leaf: {}, criterion: {}".format(d, l, cr)
                 dic["train_test_split"] = train_test_split
@@ -474,7 +473,11 @@ def build_svm_models(x_train, y_train, x_test, y_test,
 def build_all_models(x_train, y_train, x_test, y_test,
                      y_col, threshold, train_test_split,
                      k, max_depth, min_leaf, c):
-
+    '''
+    Build Decision Trees, K-nearest neighbors, logistic regression, SVM
+    for the train and test set at the different parameters
+    Returns a pandas dataframe summary of models and metrics
+    '''
     models = pd.DataFrame()
     dt = build_decision_trees(x_train, y_train, x_test, y_test, y_col,
                               threshold, train_test_split, max_depth, min_leaf)

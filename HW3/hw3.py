@@ -14,13 +14,13 @@ import classifiers
 
 ## Chosen Parameters for this code ##
 filename = "data/projects_2012_2013.csv"
+y_col = "notfullyfundedin60days"
 
-dummies = ['school_state', 'school_charter', 'school_magnet', 'teacher_prefix',
+dummies = ['school_state', 'school_metro', 'school_charter', 'school_magnet', 'teacher_prefix',
            'primary_focus_subject', 'primary_focus_area', 'secondary_focus_subject',
            'secondary_focus_area', 'resource_type', 'poverty_level', 'grade_level',
            'eligible_double_your_impact_match']
 
-y_col = "notfullyfundedin60days"
 
 features = ['school_latitude', 'school_longitude', 'total_price_including_optional_support', 'students_reached',
  'school_state_AL', 'school_state_AR', 'school_state_AZ', 'school_state_CA', 'school_state_CO', 'school_state_CT',
@@ -103,9 +103,11 @@ def hw3():
     
     df = create_label(df, y_col)
 
-    # Replace Missing Values --> to relook
-    df = etl.replace_missing_with_mode(df, ['school_metro', 'school_district', 'primary_focus_subject', 'primary_focus_area', 
-                                            'secondary_focus_subject', 'secondary_focus_area', 'resource_type', 'grade_level'])
+    # Replace Missing Values
+    df = etl.replace_missing_value(df, 'school_metro', 'rural')
+    df = etl.replace_missing_with_mode(df, ['primary_focus_subject', 'primary_focus_area', 
+                                            'secondary_focus_subject', 'secondary_focus_area',
+                                            'resource_type', 'grade_level'])
     df = etl.replace_missing_with_mean(df, ['students_reached'])
 
     # Create dummy variables
@@ -126,6 +128,9 @@ def hw3():
                                                                    test3_start_date, test3_end_date)
 
     all_tables = pd.DataFrame()
+
+    all_tables = pd.DataFrame()
+
     table1 = pipeline.build_all_models(x_train1, y_train1, x_test1, y_test1, y_col, thresholds,
                               train1_label, neighbors, max_depth, min_leaf, c)
 

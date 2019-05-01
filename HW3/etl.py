@@ -181,6 +181,16 @@ def replace_dates_with_datetime(df, date_cols):
     return df
 
 
+def replace_missing_value(df, col, val):
+    '''
+    Replace null values with val specified
+    '''
+    values = {col: val}
+    df.fillna(value=values, inplace=True)
+    return df
+
+
+
 def replace_missing_with_mode(df, cols):
     '''
     Replaces null values in dataframe with the mean of the col
