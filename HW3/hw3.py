@@ -15,7 +15,7 @@ import warnings
 warnings.filterwarnings(action='ignore', category=UndefinedMetricWarning)
 
 
-def hw3(gridsize, outfile):
+def hw3(gridsize, outfile, models_to_run):
     '''
     Code to apply machine learning pipeline to DonorChoose Data
     Returns a table with all the models run and their relevant metrics
@@ -35,8 +35,8 @@ def hw3(gridsize, outfile):
     df = etl.discretize(df, 'students_reached', [1, 31])
 
     # Train and evaluate models
-    models_to_run=['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM']
-    all_models = iterate_models(df, gridsize, y_col, outfile, models_to_run) 
+    all_models = iterate_models(df, gridsize, y_col, outfile, models_to_run)
+    print("-- done with script -- ")
     return all_models    
 
 
@@ -54,9 +54,10 @@ def create_label(df, label_name):
     return df
 
 if __name__ == '__main__':
-    gridsize = 'test'
+    gridsize = 'small'
     outfile = "results_"+gridsize+".csv"
-    hw3(gridsize, outfile)
+    models_to_run=['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM']
+    hw3(gridsize, outfile, models_to_run)
     
 
 

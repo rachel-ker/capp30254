@@ -77,7 +77,7 @@ def define_clfs_params(grid_size):
     test_grid = {
     'RF':   {'n_estimators': [5], 'max_depth': [5], 'max_features': ['sqrt'], 'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
     'ET':   {'n_estimators': [5], 'criterion' : ['gini'] ,'max_depth': [5],'max_features': ['sqrt'],'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
-    'AB':   {'algorithm': ['SAMME.R'], 'n_estimators': [6], 'random_state': [SEED]},
+    'AB':   {'algorithm': ['SAMME.R'], 'n_estimators': [5], 'random_state': [SEED]},
     'GB':   {'n_estimators': [5], 'learning_rate' : [0.1],'subsample' : [0.5], 'max_depth': [5], 'random_state': [SEED]},
     'KNN':  {'n_neighbors': [5],'weights': ['uniform'],'algorithm': ['auto']},
     'DT':   {'criterion': ['gini'], 'max_depth': [5], 'max_features': [None], 'min_samples_split': [10], 'random_state': [SEED]},
