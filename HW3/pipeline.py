@@ -104,20 +104,6 @@ def get_score_distribution(pred_score):
     sns.distplot(pred_score, kde=False, rug=False)
     plt.show()
 
-    
-def get_prediction_labels(predicted_scores, threshold):
-    '''
-    Get prediction labels according to specified threshold
-
-    Inputs:
-        predicted_scores: array of predicted scores from model
-        threshold: specified probability threshold to classify obs as positive
-    Returns an array of predicted labels
-    '''
-    calc_threshold = lambda x, y: 0 if x < y else 1 
-    predict_label = np.array( [calc_threshold(score, threshold) for score in predicted_scores] )                    
-    return predict_label
-
 
 
 #######################
@@ -125,6 +111,17 @@ def get_prediction_labels(predicted_scores, threshold):
 #######################
 
 # General evaluation metrics
+
+def joint_sort_descending(l1, l2):
+    # l1 and l2 have to be numpy arrays
+    idx = np.argsort(l1)[::-1]
+    return l1[idx], l2[idx]
+
+def generate_binary_at_k(y_scores, k):
+    cutoff_index = int(len(y_scores) * (k / 100.0))
+    predictions_binary = [1 if x < cutoff_index else 0 for x in range(len(y_scores))]
+    return predictions_binary
+
 
 def get_accuracy_score(y_test, predicted_score, threshold):
     '''
@@ -136,7 +133,7 @@ def get_accuracy_score(y_test, predicted_score, threshold):
         threshold: specified % threshold to classify obs as positive
     Returns accuracy score
     '''
-    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(y_scores), np.array(y_true))
+    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(predicted_score), np.array(y_test))
     preds_at_k = generate_binary_at_k(y_scores_sorted, threshold)
     return sklearn.metrics.accuracy_score(y_true_sorted, preds_at_k)
 
@@ -151,12 +148,11 @@ def get_precision(y_test, predicted_score, threshold):
         threshold: specified % threshold to classify obs as positive    
     Returns precision score
     '''
-    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(y_scores), np.array(y_true))
+    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(predicted_score), np.array(y_test))
     preds_at_k = generate_binary_at_k(y_scores_sorted, threshold)
     precision = sklearn.metrics.precision_score(y_true_sorted, preds_at_k)
     return precision
     
-
 
 def get_recall(y_test, predicted_score, threshold):
     '''
@@ -168,7 +164,7 @@ def get_recall(y_test, predicted_score, threshold):
         threshold: specified % threshold to classify obs as positive        
     Returns recall score
     '''
-    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(y_scores), np.array(y_true))
+    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(predicted_score), np.array(y_test))
     preds_at_k = generate_binary_at_k(y_scores_sorted, threshold)
     recall = sklearn.metrics.recall_score(y_true_sorted, preds_at_k)
     return recall
@@ -184,20 +180,9 @@ def get_f1(y_test, predicted_score, threshold):
         threshold: specified % threshold to classify obs as positive        
     Returns f1 score
     '''
-    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(y_scores), np.array(y_true))
+    y_scores_sorted, y_true_sorted = joint_sort_descending(np.array(predicted_score), np.array(y_test))
     preds_at_k = generate_binary_at_k(y_scores_sorted, threshold)
     return sklearn.metrics.f1_score(y_true_sorted, preds_at_k)
-
-
-def joint_sort_descending(l1, l2):
-    # l1 and l2 have to be numpy arrays
-    idx = np.argsort(l1)[::-1]
-    return l1[idx], l2[idx]
-
-def generate_binary_at_k(y_scores, k):
-    cutoff_index = int(len(y_scores) * (k / 100.0))
-    predictions_binary = [1 if x < cutoff_index else 0 for x in range(len(y_scores))]
-    return predictions_binary
 
 
 def get_auc(y_test, predicted_score):
