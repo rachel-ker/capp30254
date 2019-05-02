@@ -35,14 +35,6 @@ def iterate_models(data, grid_size, outcomes, outfile,
        'resource_type', 'poverty_level', 'grade_level',
        'total_price_including_optional_support_discrete', 'students_reached_discrete',
        'eligible_double_your_impact_match']
-    
-    # Generate all possible subsets of the feature/predictor groups
-#    predictor_subsets = get_subsets(features)
-
-#    all_predictors=[]
-#    for p in predictor_subsets:
-#        merged = list(itertools.chain.from_iterable(p))
-#        all_predictors.append(merged)
 
     # Write header for the csv
     with open(outfile, "w") as myfile:
@@ -95,7 +87,7 @@ def iterate_models(data, grid_size, outcomes, outfile,
                         score = pipeline.get_predicted_scores(clf, x_test[col], svm=False)
 
                     results_df.loc[len(results_df)] = [ models_to_run[index], clf, p, outcomes,
-                                                        labels[i], len(x_train), len(y_train), features, 
+                                                        labels[i], len(x_train), len(x_test), features, 
                                                         pipeline.get_precision(y_test, score, 100),
                                                         pipeline.get_precision(y_test, score, 1),
                                                         pipeline.get_precision(y_test, score, 2),
