@@ -8,7 +8,7 @@ run 'python hw3.py' on command line
 results will appear in a csv file titled "results_small.csv" and "df_results_small.csv"  
   
 ## Files:  
-pipeline.py - code for train-test split and evaluation 
+pipeline.py - code for train-test split and evaluation  
 etl.py - code to read, explore, transform data to be ready to build classifiers  
 classifiers.py - code to build each specific classifier and to specify parameters  
 iteratemodels.py - code to iterate through the different parameters and evaluate the models 
