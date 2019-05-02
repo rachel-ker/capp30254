@@ -75,14 +75,14 @@ def define_clfs_params(grid_size):
             }
     
     test_grid = {
-    'RF':   {'n_estimators': [1], 'max_depth': [1], 'max_features': ['sqrt'], 'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
-    'ET':   {'n_estimators': [1], 'criterion' : ['gini'] ,'max_depth': [1],'max_features': ['sqrt'],'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
-    'AB':   {'algorithm': ['SAMME.R'], 'n_estimators': [1], 'random_state': [SEED]},
-    'GB':   {'n_estimators': [1], 'learning_rate' : [0.1],'subsample' : [0.5], 'max_depth': [1], 'random_state': [SEED]},
+    'RF':   {'n_estimators': [5], 'max_depth': [5], 'max_features': ['sqrt'], 'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'ET':   {'n_estimators': [5], 'criterion' : ['gini'] ,'max_depth': [5],'max_features': ['sqrt'],'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'AB':   {'algorithm': ['SAMME.R'], 'n_estimators': [6], 'random_state': [SEED]},
+    'GB':   {'n_estimators': [5], 'learning_rate' : [0.1],'subsample' : [0.5], 'max_depth': [5], 'random_state': [SEED]},
     'KNN':  {'n_neighbors': [5],'weights': ['uniform'],'algorithm': ['auto']},
-    'DT':   {'criterion': ['gini'], 'max_depth': [1], 'max_features': [None], 'min_samples_split': [10], 'random_state': [SEED]},
-    'SVM':  {'C' :[0.01], 'random_state': [SEED]},
-    'LR':   {'penalty': ['l1'], 'C': [0.01], 'random_state': [SEED]},
+    'DT':   {'criterion': ['gini'], 'max_depth': [5], 'max_features': [None], 'min_samples_split': [10], 'random_state': [SEED]},
+    'SVM':  {'C' :[0.01,10], 'random_state': [SEED]},
+    'LR':   {'penalty': ['l1','l2'], 'C': [0.01,10], 'random_state': [SEED]},
     'BAG':  {'n_estimators': [1], 'n_jobs': [-1], 'random_state': [SEED]}
             }
     
