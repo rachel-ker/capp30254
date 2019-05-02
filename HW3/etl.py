@@ -191,33 +191,35 @@ def replace_missing_value(df, col, val):
 
 
 
-def replace_missing_with_mode(df, cols):
+def replace_missing_with_mode(data_with_missing, data_to_calculate_mode, cols):
     '''
-    Replaces null values in dataframe with the mean of the col
+    Replaces null values in dataframe with the mode of the col
     Inputs:
-        df: pandas dataframe
+        data_with_missing: pandas df
+        data_to_calculate_mean: pandas dataframe
         cols: list of col
     Returns a pandas dataframe with missing values replaced
     '''
     values = {}
     for col in cols:
-        values[col] = df[col].mode().loc[0]
-    df.fillna(value=values, inplace=True)
+        values[col] = data_to_calculate_mode[col].mode().loc[0]
+    df = data_with_missing.fillna(value=values)
     return df
 
 
-def replace_missing_with_mean(df, cols):
+def replace_missing_with_mean(data_with_missing, data_to_calculate_mean, cols):
     '''
     Replaces null values in dataframe with the mean of the col
     Inputs:
-        df: pandas dataframe
+        data_with_missing: pandas df
+        data_to_calculate_mean: pandas dataframe
         cols: list of col
     Returns a pandas dataframe with missing values replaced
     '''
     values = {}
     for col in cols:
-        values[col] = df[col].mean()
-    df.fillna(value=values, inplace=True)
+        values[col] = data_to_calculate_mean[col].mean()
+    df = data_with_missing.fillna(value=values)
     return df
 
 
@@ -239,7 +241,6 @@ def discretize(df, continuous_var, lower_bounds):
     min_val = df[continuous_var].min()
     assert lower_bounds[0] == min_val
     max_val = df[continuous_var].max()
-    print("min_val:{}, max_val:{}".format(min_val, max_val))
 
     lower_bounds = lower_bounds + [max_val+1]
 
@@ -248,7 +249,6 @@ def discretize(df, continuous_var, lower_bounds):
     for i in range(len(lower_bounds)-1):
         key = str(lower_bounds[i]) + "_to_" + str(lower_bounds[i+1])
         replace_dict[key] = lower_bounds[i]
-    print(replace_dict)
 
     df[continuous_var + "_discrete"] = pd.cut(df[continuous_var],
                                               right=False,
@@ -261,6 +261,8 @@ def discretize(df, continuous_var, lower_bounds):
 def create_dummies(df, categorical_var):
     '''
     Creates dummy variables from categorical var
+    and drops the categorical var
+    
     Inputs:
         df: pandas dataframe
         categorical: column name
@@ -269,4 +271,5 @@ def create_dummies(df, categorical_var):
     dummy = pd.get_dummies(df[categorical_var],
                            prefix=categorical_var,
                            drop_first=True)
+    df.drop(categorical_var, axis=1, inplace=True)
     return df.join(dummy)

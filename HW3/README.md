@@ -3,15 +3,18 @@
 This repository contains files for Homework 3, where we improve the simple machine learning pipeline from HW2
 and apply it to data on project funding on donorschoose.  
   
-Files:  
-pipeline.py - code for the general functions in machine learning pipeline  
+## To Run  
+run 'hw3.py' on command line  
+results will appear in a csv file titled "results_small.csv" and "df_results_small.csv"  
+  
+## Files:  
+pipeline.py - code for train-test split and evaluation 
 etl.py - code to read, explore, transform data to be ready to build classifiers  
-classifiers.py - code to build each specific classifier  
+classifiers.py - code to build each specific classifier and to specify parameters  
+iteratemodels.py - code to iterate through the different parameters and evaluate the models 
   
 hw3-writeup.pdf - short report on findings  
-hw3.py - code applied to donorschoose data  
-hw3.ipynb - jupyter notebook version of the code  
-Missing data exploration.ipynb - exploration of missing data  
+hw3.py - code applied to DonorsChoose data  
   
 requirements.txt - required libraries and versions  
   

@@ -6,11 +6,11 @@ Rachel Ker
 import pandas as pd
 
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn import tree
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
-from sklearn.ensemble import (RandomForestClassifier, BaggingClassifier, GradientBoostingClassifier, 
-AdaBoostClassifier)
+from sklearn.ensemble import (RandomForestClassifier, ExtraTreesClassifier,
+GradientBoostingClassifier, AdaBoostClassifier, BaggingClassifier)
 
 import graphviz
 from mlxtend.plotting import plot_decision_regions
@@ -18,6 +18,90 @@ from mlxtend.plotting import plot_decision_regions
 SEED = 0
 
 
+def define_clfs_params(grid_size):
+
+    """
+    This functions defines parameter grid for all the classifiers
+    Inputs:
+       grid_size: how big of a grid do you want. it can be test, small, or large
+    Returns:
+        a set of model and parameters
+    Raises:
+        KeyError: Raises an exception.
+    """
+
+    clfs = {'RF': RandomForestClassifier(n_jobs=-1, random_state=SEED),
+            'ET': ExtraTreesClassifier(n_jobs=-1, criterion='entropy', random_state=SEED),
+            'AB': AdaBoostClassifier(DecisionTreeClassifier(max_depth=1), random_state=SEED),
+            'GB': GradientBoostingClassifier(learning_rate=0.05, subsample=0.5, max_depth=6,
+                                             n_estimators=10, random_state=SEED),
+            'KNN': KNeighborsClassifier(n_neighbors=3),
+            'DT': DecisionTreeClassifier(max_depth=5, random_state=SEED),
+            'SVM': LinearSVC(random_state=SEED),
+            'LR': LogisticRegression(penalty='l1', C=1e5, random_state=SEED),
+            'BAG': BaggingClassifier(random_state=SEED)
+            }
+
+    large_grid = { 
+    'RF':   {'n_estimators': [1,10,100,1000,10000], 'max_depth': [1,5,10,20,50,100], 'max_features': ['sqrt','log2'],
+             'min_samples_split': [2,5,10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'ET':   {'n_estimators': [1,10,100,1000,10000], 'criterion' : ['gini', 'entropy'] ,'max_depth': [1,5,10,20,50,100],
+             'max_features': ['sqrt','log2'],'min_samples_split': [2,5,10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'AB':   {'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [1,10,100,1000,10000], 'random_state': [SEED]},
+    'GB':   {'n_estimators': [1,10,100,1000,10000], 'learning_rate' : [0.001,0.01,0.05,0.1,0.5],'subsample' : [0.1,0.5,1.0],
+             'max_depth': [1,3,5,10,20,50,100], 'random_state': [SEED]},
+    'KNN':  {'n_neighbors': [1,5,10,25,50,100],'weights': ['uniform','distance'],'algorithm': ['auto','ball_tree','kd_tree']},
+    'DT':   {'criterion': ['gini', 'entropy'], 'max_depth': [1,5,10,20,50,100], 'max_features': [None, 'sqrt','log2'],
+             'min_samples_split': [2,5,10], 'random_state': [SEED]},
+    'SVM':  {'C' :[0.00001,0.0001,0.001,0.01,0.1,1,10], 'random_state': [SEED]},
+    'LR':   {'penalty': ['l1','l2'], 'C': [0.00001,0.0001,0.001,0.01,0.1,1,10], 'random_state': [SEED]},
+    'BAG':  {'n_estimators': [1,10,100,1000,10000], 'n_jobs': [-1], 'random_state': [SEED]}
+           }
+    
+    small_grid = {
+    'RF':   {'n_estimators': [100,10000], 'max_depth': [5,50], 'max_features': ['sqrt','log2'],
+             'min_samples_split': [2,10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'ET':   {'n_estimators': [100,10000], 'criterion' : ['gini', 'entropy'] ,'max_depth': [5,50],
+             'max_features': ['sqrt','log2'],'min_samples_split': [2,10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'AB':   {'algorithm': ['SAMME', 'SAMME.R'], 'n_estimators': [1,10,100,1000,10000], 'random_state': [SEED]},
+    'GB':   {'n_estimators': [100,10000], 'learning_rate' : [0.001,0.01,0.5],'subsample' : [0.1,0.5,1.0],
+             'max_depth': [5,50], 'random_state': [SEED]},
+    'KNN':  {'n_neighbors': [1,5,10,25,50,100],'weights': ['uniform','distance'],'algorithm': ['auto','ball_tree','kd_tree']},
+    'DT':   {'criterion': ['gini', 'entropy'], 'max_depth': [1,5,10,20,50,100], 'max_features': [None, 'sqrt','log2'],
+             'min_samples_split': [2,5,10], 'random_state': [SEED]},
+    'SVM':  {'C' :[0.00001,0.0001,0.001,0.01,0.1,1,10], 'random_state': [SEED]},
+    'LR':   {'penalty': ['l1','l2'], 'C': [0.00001,0.001,0.1,1,10], 'random_state': [SEED]},
+    'BAG':  {'n_estimators': [100,10000], 'n_jobs': [-1], 'random_state': [SEED]}
+            }
+    
+    test_grid = {
+    'RF':   {'n_estimators': [1], 'max_depth': [1], 'max_features': ['sqrt'], 'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'ET':   {'n_estimators': [1], 'criterion' : ['gini'] ,'max_depth': [1],'max_features': ['sqrt'],'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'AB':   {'algorithm': ['SAMME.R'], 'n_estimators': [1], 'random_state': [SEED]},
+    'GB':   {'n_estimators': [1], 'learning_rate' : [0.1],'subsample' : [0.5], 'max_depth': [1], 'random_state': [SEED]},
+    'KNN':  {'n_neighbors': [5],'weights': ['uniform'],'algorithm': ['auto']},
+    'DT':   {'criterion': ['gini'], 'max_depth': [1], 'max_features': [None], 'min_samples_split': [10], 'random_state': [SEED]},
+    'SVM':  {'C' :[0.01], 'random_state': [SEED]},
+    'LR':   {'penalty': ['l1'], 'C': [0.01], 'random_state': [SEED]},
+    'BAG':  {'n_estimators': [1], 'n_jobs': [-1], 'random_state': [SEED]}
+            }
+    
+
+    
+    if (grid_size == 'large'):
+        return clfs, large_grid
+    elif (grid_size == 'small'):
+        return clfs, small_grid
+    elif (grid_size == 'test'):
+        return clfs, test_grid
+    else:
+        return 0, 0
+
+
+
+### NOT REQUIRED ###
+
+    
 #######################
 # K-nearest neighbors #
 #######################
@@ -70,7 +154,7 @@ def build_decision_tree(x_train, y_train, criterion, max_depth, min_leaf):
         
     Returns Decision Tree Classifier object
     '''
-    dt_model = tree.DecisionTreeClassifier(criterion=criterion,
+    dt_model = DecisionTreeClassifier(criterion=criterion,
                                            splitter='best',
                                            max_depth=max_depth,
                                            min_samples_leaf=min_leaf,

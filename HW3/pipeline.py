@@ -80,29 +80,20 @@ def temporal_split(df, y_col, features, date_col,
 #######################
 
 
-def get_predicted_scores(model, x_test):
+def get_predicted_scores(model, x_test, svm):
     '''
     Get prediction scores according to specified threshold
 
     Inputs:
         model: classifier object
         x_test: testing set features
+        svm: If this is an svm model, set to True. else False.
     Returns an array of predicted scores
     '''
-    scores = model.predict_proba(x_test)[:,1]
-    return scores
-
-
-def get_predicted_scores_for_svm(svm_model, x_test):
-    '''
-    Get prediction scores for svm
-
-    Inputs:
-        svm_model: svm object
-        x_test: testing set features
-    Returns an array of predicted scores
-    '''
-    scores = svm_model.decision_function(x_test)
+    if svm:
+        scores = model.decision_function(x_test)
+    else:
+        scores = model.predict_proba(x_test)[:,1]
     return scores
 
 
@@ -126,49 +117,6 @@ def get_prediction_labels(predicted_scores, threshold):
     calc_threshold = lambda x, y: 0 if x < y else 1 
     predict_label = np.array( [calc_threshold(score, threshold) for score in predicted_scores] )                    
     return predict_label
-
-
-def vary_threshold(model, x_test, y_test, threshold, svm=False):
-    '''
-    Runs through a list of threshold to pick a threshold to use for predicted labels
-    Prints the number of predicted positives and accuracy score for each threshold
-    to compare with actual number of positives in labels
-
-    Inputs:
-        model: 
-        x_test, y_test: testing sets from data
-        threshold: (list of threshold to test)
-        svm: if the model is svm (defaults to False)
-
-    Returns a dictionary
-    ''' 
-    table = {"true_num_positives": [],
-             "total_obs": [],
-             "threshold": [],
-             "predicted_num_positives": [],
-             "accuracy": [],
-             "precision": [],
-             "recall": [],
-             "f1_score": [],
-             "auc": []}
-    
-    for t in threshold:
-        if svm:
-            scores = get_predicted_scores_for_svm(model, x_test)
-        else:
-            scores = get_predicted_scores(model, x_test)
-
-        table["true_num_positives"] += [sum(y_test)]
-        table["total_obs"] += [len(y_test)]
-        table["threshold"] += [t]
-        table["predicted_num_positives"] += [sum(get_prediction_labels(scores, t))]
-        table["accuracy"] += [get_accuracy_score(y_test, scores, t)]
-        table["precision"] += [get_precision(y_test, scores, t)]
-        table["recall"] += [get_recall(y_test, scores, t)]
-        table["f1_score"] += [get_f1(y_test, scores, t)]
-        table["auc"] += [get_auc(y_test, scores)]
-
-    return table
 
 
 
@@ -262,15 +210,6 @@ def get_auc(y_test, predicted_score):
     '''
     return sklearn.metrics.roc_auc_score(y_test, predicted_score)
 
-def random_baseline(x_test):
-    '''
-    Get random predictions
-    '''
-    random_score = [random.uniform(0,1) for i in enumerate(x_test)]
-    calc_threshold = lambda x, y: 0 if x < y else 1 
-    random_predicted = np.array( [calc_threshold(score, 0.5) for score in random_score] )
-    return random_predicted
-
 
 def plot_roc_curve(y_test, predicted_scores, labels):
     '''
@@ -320,7 +259,7 @@ def plot_precision_recall_curve(y_test, predicted_scores, model_names):
     plt.show()
 
 
-def plot_precision_recall_n(y_true, y_prob, model_name):
+def plot_precision_recall_n(y_true, y_prob, model_name, output_type):
     '''
     Plot precision and recall for each threshold
 
@@ -328,6 +267,7 @@ def plot_precision_recall_n(y_true, y_prob, model_name):
         y_true: real labels for testing set
         y_prob: array of predicted scores from model
         model_name: (str) title for plot
+        output_type: (str) save or show
     '''
     y_score = y_prob
     precision_curve, recall_curve, pr_thresholds = sklearn.metrics.precision_recall_curve(y_true, y_score)
@@ -356,9 +296,13 @@ def plot_precision_recall_n(y_true, y_prob, model_name):
     plt.legend([l1,l2],['precision','recall'], loc=2)
 
     plt.title(model_name)
-    plt.savefig(model_name + 'precision_recall_threshold')
 
-    plt.show()
+    if (output_type == 'save'):
+        plt.savefig(model_name + 'precision_recall_threshold')
+    elif (output_type == 'show'):
+        plt.show()
+    else:
+        plt.show()
     # (Source: https://github.com/dssg/hitchhikers-guide/blob/master/sources/curriculum/3_modeling_and_machine_learning/machine-learning/machine_learning_clean.ipynb)
 
 
@@ -377,7 +321,65 @@ def best_model(df, metric):
     
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###### NOT REQUIRED ############
 # Evaluate Specific Classifiers #
+
+def vary_threshold(model, x_test, y_test, threshold, svm=False):
+    '''
+    Runs through a list of threshold to pick a threshold to use for predicted labels
+    Prints the number of predicted positives and accuracy score for each threshold
+    to compare with actual number of positives in labels
+
+    Inputs:
+        model: 
+        x_test, y_test: testing sets from data
+        threshold: (list of threshold to test)
+        svm: if the model is svm (defaults to False)
+
+    Returns a dictionary
+    ''' 
+    table = {"true_num_positives": [],
+             "total_obs": [],
+             "threshold": [],
+             "predicted_num_positives": [],
+             "accuracy": [],
+             "precision": [],
+             "recall": [],
+             "f1_score": [],
+             "auc": []}
+    
+    for t in threshold:
+        if svm:
+            scores = get_predicted_scores_for_svm(model, x_test)
+        else:
+            scores = get_predicted_scores(model, x_test)
+
+        table["true_num_positives"] += [sum(y_test)]
+        table["total_obs"] += [len(y_test)]
+        table["threshold"] += [t]
+        table["predicted_num_positives"] += [sum(get_prediction_labels(scores, t))]
+        table["accuracy"] += [get_accuracy_score(y_test, scores, t)]
+        table["precision"] += [get_precision(y_test, scores, t)]
+        table["recall"] += [get_recall(y_test, scores, t)]
+        table["f1_score"] += [get_f1(y_test, scores, t)]
+        table["auc"] += [get_auc(y_test, scores)]
+
+    return table
+
 
 def build_knn_models(x_train, y_train, x_test, y_test,
                      y_col, threshold, train_test_split,
@@ -691,7 +693,7 @@ def build_random_forests(x_train, y_train, x_test, y_test,
 
 def build_all_models(x_train, y_train, x_test, y_test,
                      y_col, threshold, train_test_split,
-                     k, max_depth, min_leaf, c, n_estimators,
+                     k, dist, max_depth, min_leaf, c, n_estimators,
                      base_model_bag, base_model_ada, n_jobs):
     '''
     Build Decision Trees, K-nearest neighbors, logistic regression, SVM
@@ -703,7 +705,7 @@ def build_all_models(x_train, y_train, x_test, y_test,
                               threshold, train_test_split, max_depth, min_leaf)
     
     knn = build_knn_models(x_train, y_train, x_test, y_test, y_col,
-                           threshold, train_test_split, k)
+                           threshold, train_test_split, k, p=dist)
     
     lr = build_logistic_regressions(x_train, y_train, x_test, y_test, y_col,
                                     threshold, train_test_split, c)
@@ -733,4 +735,8 @@ def build_all_models(x_train, y_train, x_test, y_test,
     
     return models
     
+
+
+
+
 
