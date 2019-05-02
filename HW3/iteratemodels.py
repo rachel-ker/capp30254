@@ -139,7 +139,7 @@ def iterate_models(data, grid_size, outcomes, outfile,
                                             pipeline.get_recall(y_test, score, 20),
                                             pipeline.get_recall(y_test, score, 30),
                                             pipeline.get_recall(y_test, score, 50),
-                                            pipeline.get_auc(y_test, score)]
+                                            pipeline.get_auc(y_test, score)])
                 except IndexError:
                     print("IndexError")
                     continue
