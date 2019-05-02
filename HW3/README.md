@@ -5,7 +5,7 @@ and apply it to data on project funding on donorschoose.
   
 ## To Run  
 run 'python hw3.py' on command line  
-results will appear in a csv file titled "results_small.csv" and "df_results_small.csv"  
+results will appear in csv file  
   
 ## Files:  
 pipeline.py - code for train-test split and evaluation  
