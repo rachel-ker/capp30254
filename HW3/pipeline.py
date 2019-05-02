@@ -189,6 +189,17 @@ def get_f1(y_test, predicted_score, threshold):
     return sklearn.metrics.f1_score(y_true_sorted, preds_at_k)
 
 
+def joint_sort_descending(l1, l2):
+    # l1 and l2 have to be numpy arrays
+    idx = np.argsort(l1)[::-1]
+    return l1[idx], l2[idx]
+
+def generate_binary_at_k(y_scores, k):
+    cutoff_index = int(len(y_scores) * (k / 100.0))
+    predictions_binary = [1 if x < cutoff_index else 0 for x in range(len(y_scores))]
+    return predictions_binary
+
+
 def get_auc(y_test, predicted_score):
     '''
     Get area under the curve score score for the predicted labels
