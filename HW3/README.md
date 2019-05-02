@@ -4,7 +4,7 @@ This repository contains files for Homework 3, where we improve the simple machi
 and apply it to data on project funding on donorschoose.  
   
 ## To Run  
-run 'hw3.py' on command line  
+run 'python hw3.py' on command line  
 results will appear in a csv file titled "results_small.csv" and "df_results_small.csv"  
   
 ## Files:  
