@@ -294,16 +294,21 @@ def plot_precision_recall_n(y_true, y_prob, model_name, output_type):
 
 # Getting Best models #
 
-def best_model(df, metric):
+def best_model(df, metrics, parameters):
     '''
     Identify best models for the specified metric
     Inputs:
         df: pandas dataframe
         metric: (str) precision, recall, accuracy, f1_score, auc
+        parameters: list of parameters we care about
     
-    Return dataframe with best models
+    Return dictionary of best model for each metric
     '''
-    return df[df[metric] == df[metric].max()]
+    best_models= {}
+    for m in metrics:
+        best = df[df[m]==df[m].max()][parameters + [m]]
+        best_models[m] = best
+    return best_models
     
 
 

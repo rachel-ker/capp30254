@@ -15,6 +15,11 @@ import warnings
 warnings.filterwarnings(action='ignore', category=UndefinedMetricWarning)
 
 
+metrics = ['precision_at_1','precision_at_2','precision_at_5','precision_at_10','precision_at_20','precision_at_30',
+           'precision_at_50',' recall_at_1','recall_at_2','recall_at_5','recall_at_10','recall_at_20','recall_at_30','recall_at_50','auc-roc']
+labels = ["jan12-jun12/jul12-dec12", "jan12-dec12/jan13-jun13", "jan12-jun13/jul13-dec13"]
+
+
 def hw3(gridsize, outfile, models_to_run):
     '''
     Code to apply machine learning pipeline to DonorChoose Data
@@ -37,7 +42,26 @@ def hw3(gridsize, outfile, models_to_run):
     # Train and evaluate models
     all_models = iterate_models(df, gridsize, y_col, outfile, models_to_run)
     print("-- done with script -- ")
+        
     return all_models    
+
+
+def get_best_models(df, labels, parameters, metrics):
+    '''
+    Find best models for each train test set based on metrics
+    Inputs:
+        df: pandas dataframe of all results
+        labels: list of the label indicating sets
+        parameters: list of parameters we care about
+        metrics: list of metrics
+    Returns a dictionary of best model for each metric
+    '''
+    all_best = []
+    for lab in labels:
+        data = df[df['trainsetlabel']==lab]
+        best = pipeline.best_model(data, metrics, parameters)
+        all_best.append(best)
+    return all_best
 
 
 def create_label(df, label_name):
