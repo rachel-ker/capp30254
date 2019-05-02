@@ -54,8 +54,8 @@ def create_label(df, label_name):
     return df
 
 if __name__ == '__main__':
-    gridsize = 'small'
-    outfile = "results_small.csv"
+    gridsize = 'test'
+    outfile = "results_"+gridsize+".csv"
     hw3(gridsize, outfile)
     
 
