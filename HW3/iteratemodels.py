@@ -106,7 +106,7 @@ def iterate_models(data, grid_size, outcomes, outfile,
                                                         pipeline.get_auc(y_test, score)]
 
                     # plot precision recall graph
-#                    pipeline.plot_precision_recall_n(y_test, score, clf, 'show')
+                    pipeline.plot_precision_recall_n(y_test, score, clf, 'save')
 
                     with open(outfile, "a") as myfile:
                         csvwriter = csv.writer(myfile, dialect='excel', quoting=csv.QUOTE_ALL)
