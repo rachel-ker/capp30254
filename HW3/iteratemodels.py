@@ -105,9 +105,10 @@ def iterate_models(data, grid_size, outcomes, outfile,
                                                         pipeline.get_recall(y_test, score, 50),
                                                         pipeline.get_auc(y_test, score)]
 
-                    # plot precision recall graph
-                    model_name = [models_to_run[index] + str(p)
+                    # plot precision recall graph                      
+                    model_name = str(clf) + ' ' + labels[i]
                     pipeline.plot_precision_recall_n(y_test, score, model_name, 'save')
+                    print("saved graph", model_name, ' ', str(p))
 
                     with open(outfile, "a") as myfile:
                         csvwriter = csv.writer(myfile, dialect='excel', quoting=csv.QUOTE_ALL)

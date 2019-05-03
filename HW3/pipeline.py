@@ -284,7 +284,7 @@ def plot_precision_recall_n(y_true, y_prob, model_name, output_type):
     plt.title(model_name)
 
     if (output_type == 'save'):
-        plt.savefig("graphs/" + model_name + 'precision_recall_threshold')
+        plt.savefig("graphs/" + model_name)
     elif (output_type == 'show'):
         plt.show()
     else:
