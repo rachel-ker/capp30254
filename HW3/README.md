@@ -15,6 +15,7 @@ iteratemodels.py - code to iterate through the different parameters and evaluate
   
 hw3-writeup.pdf - short report on findings  
 hw3.py - code applied to DonorsChoose data  
+results.ipynb - exploring and understanding results to justify model selection  
   
 requirements.txt - required libraries and versions  
   
