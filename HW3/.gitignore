@@ -2,6 +2,7 @@
 __pycache__/
 env/
 results/
+graphs/*/*png
 *ipynb
 *csv
 *docx
