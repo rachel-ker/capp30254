@@ -2,7 +2,7 @@
 __pycache__/
 env/
 results/
-graphs/*/*png
+graphs/trainset1 (RF-BAG)/
 *ipynb
 *csv
 *docx
