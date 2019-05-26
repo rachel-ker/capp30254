@@ -38,9 +38,9 @@ METRICS_THRESHOLD = (['precision', 'recall', 'f1'], [1,2,5,10,20,30])
 OTHER_METRICS = ['auc']
 
 ## RUNNING THE MODELS
-GRIDSIZE = 'small'
+GRIDSIZE = 'large'
 OUTFILE = "results_"+GRIDSIZE+".csv"
-MODELS = ['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM']
+MODELS = ['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM', 'NB']
 SEED = 0
 
 def define_clfs_params(grid_size):
@@ -64,7 +64,8 @@ def define_clfs_params(grid_size):
     'DT':   {'criterion': ['gini', 'entropy'], 'max_depth': [1,5,10,20,50,100], 'min_samples_split': [2,5,10,50,100], 'random_state': [SEED]},
     'SVM':  {'C' :[0.00001,0.0001,0.001,0.01,0.1,1,10], 'random_state': [SEED]},
     'LR':   {'penalty': ['l1','l2'], 'C': [0.00001,0.0001,0.001,0.01,0.1,1,10], 'random_state': [SEED]},
-    'BAG':  {'n_estimators': [1,10,100,1000,10000], 'n_jobs': [-1], 'random_state': [SEED]}
+    'BAG':  {'n_estimators': [1,10,100,1000,10000], 'n_jobs': [-1], 'random_state': [SEED]},
+    'NB':   {'alpha': [0.00001,0.0001,0.001,0.01,0.1,1,10], 'fit_prior': [True, False]}
            }
     
     small_grid = {
@@ -79,7 +80,8 @@ def define_clfs_params(grid_size):
     'DT':   {'criterion': ['gini', 'entropy'], 'max_depth': [1,5,10,20], 'min_samples_split': [2,10,50], 'random_state': [SEED]},
     'SVM':  {'C' :[0.01,0.1,1,10], 'random_state': [SEED]},
     'LR':   {'penalty': ['l1','l2'], 'C': [0.01,0.1,1,10], 'random_state': [SEED]},
-    'BAG':  {'n_estimators': [10,100,1000], 'n_jobs': [-1], 'random_state': [SEED]}
+    'BAG':  {'n_estimators': [10,100,1000], 'n_jobs': [-1], 'random_state': [SEED]},
+    'NB':   {'alpha': [0.01,0.1,1,10], 'fit_prior': [True, False]
             }
     
     test_grid = {
@@ -92,7 +94,8 @@ def define_clfs_params(grid_size):
     'DT':   {'criterion': ['gini'], 'max_depth': [5], 'min_samples_split': [10], 'random_state': [SEED]},
     'SVM':  {'C' :[10], 'random_state': [SEED]},
     'LR':   {'penalty': ['l1'], 'C': [10], 'random_state': [SEED]},
-    'BAG':  {'n_estimators': [1], 'n_jobs': [-1], 'random_state': [SEED]}
+    'BAG':  {'n_estimators': [1], 'n_jobs': [-1], 'random_state': [SEED]},
+    'NB':   {'alpha': [1], 'fit_prior': [True, False]}    
             }
 
     

@@ -24,6 +24,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import (RandomForestClassifier, ExtraTreesClassifier,
 GradientBoostingClassifier, AdaBoostClassifier, BaggingClassifier)
 
@@ -356,7 +357,8 @@ clfs = {'RF': RandomForestClassifier(n_jobs=-1, random_state=SEED),
         'DT': DecisionTreeClassifier(max_depth=5, random_state=SEED),
         'SVM': LinearSVC(random_state=SEED),
         'LR': LogisticRegression(penalty='l1', C=1e5, random_state=SEED),
-        'BAG': BaggingClassifier(random_state=SEED)
+        'BAG': BaggingClassifier(random_state=SEED),
+        'NB': MultinomialNB(alpha=1.0)
         }
 
 
