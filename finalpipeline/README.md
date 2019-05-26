@@ -14,7 +14,6 @@ etl.py - generic code to read, explore, transform data
 pipeline.py - generic code for train-test split, evaluation, building the different models  
 config.py - configurations and constants for this code  
 run.py - putting everything together to apply to DonorsChoose data (produces a csv file of results)  
-results.ipynb - exploring and understanding results to justify model selection  
   
 requirements.txt - required libraries and versions  
 script.sbatch - to run job on rcc  
