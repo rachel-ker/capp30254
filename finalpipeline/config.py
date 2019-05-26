@@ -38,7 +38,7 @@ METRICS_THRESHOLD = (['precision', 'recall', 'f1'], [1,2,5,10,20,30])
 OTHER_METRICS = ['auc']
 
 ## RUNNING THE MODELS
-GRIDSIZE = 'small'
+GRIDSIZE = 'large'
 OUTFILE = "results_"+GRIDSIZE+".csv"
 MODELS = ['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM', 'NB']
 SEED = 0
