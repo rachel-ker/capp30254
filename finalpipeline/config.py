@@ -81,7 +81,7 @@ def define_clfs_params(grid_size):
     'SVM':  {'C' :[0.01,0.1,1,10], 'random_state': [SEED]},
     'LR':   {'penalty': ['l1','l2'], 'C': [0.01,0.1,1,10], 'random_state': [SEED]},
     'BAG':  {'n_estimators': [10,100,1000], 'n_jobs': [-1], 'random_state': [SEED]},
-    'NB':   {'alpha': [0.01,0.1,1,10], 'fit_prior': [True, False]
+    'NB':   {'alpha': [0.01,0.1,1,10], 'fit_prior': [True, False]}
             }
     
     test_grid = {
