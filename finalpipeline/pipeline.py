@@ -387,9 +387,9 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
     for i,dates in enumerate(train_test_dates):
         # split train test sets
         x_train, x_test, y_train, y_test = temporal_split(data, outcomes, features, date_to_split,
-                                                            dates[0], dates[1], 
-                                                            str(time_period) + ' days',
-                                                            str(test_period) + ' days')
+                                                          dates[0], dates[1], 
+                                                          str(time_period) + ' days',
+                                                          str(test_period) + ' days')
         print('train test split done - {}'.format(labels[i]))
 
         # data cleaning on train test splits separately
@@ -402,6 +402,11 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
             x_test = etl.discretize(x_test, var, bins, bin_label, False)
         print('discretization done')
 
+        for m in missing:
+            x_train.loc[:,m + '_missing'] = x_train[m].isna().astype(int)
+            x_test.loc[:,m + '_missing'] = x_test[m].isna().astype(int)
+        print('missing indicators created')
+
         x_train = etl.replace_missing_with_mode(x_train, x_train, missing)
         x_test = etl.replace_missing_with_mode(x_test, x_test, missing)
         print('imputation done')
@@ -409,9 +414,16 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
         for d in list(x_train.columns):
             x_train = etl.create_dummies(x_train, d)
             x_test = etl.create_dummies(x_test, d)
-        print('dummies created')
 
         col = list(x_train.columns)
+        for c in col:
+            if c not in x_test.columns:
+                x_test.loc[:,c] = 0
+        x_test = x_test[col]
+        # only consider the dummies that is created in the train set
+        
+        print('dummies created')
+
 
         for index,clf in enumerate([clfs[x] for x in models_to_run]):
             parameter_values = grid[models_to_run[index]]
@@ -425,9 +437,9 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
 
                 # get predictions from model on test only for the columns that appear in train
                 if isinstance(clf, LinearSVC):
-                    score = get_predicted_scores(clf, x_test[col], svm=True)
+                    score = get_predicted_scores(clf, x_test, svm=True)
                 else:
-                    score = get_predicted_scores(clf, x_test[col], svm=False)
+                    score = get_predicted_scores(clf, x_test, svm=False)
 
                 # writing out results in pandas df
                 strp = str(p)
