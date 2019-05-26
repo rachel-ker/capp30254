@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=mlpipeline
-#SBATCH --output=example_sbatch.out
-#SBATCH --error=example_sbatch.err
+#SBATCH --job-name=large_all_features
+#SBATCH --output=largeallfeatures.out
+#SBATCH --error=largeallfeatures.err
 #SBATCH --partition=broadwl
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=14
