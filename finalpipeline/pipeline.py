@@ -416,9 +416,11 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
 
         scaler = MinMaxScaler()
         for c in config.CONTINUOUS:
-            x_train[c] = scaler.fit_transform(x_train[c].values)
+            data_for_fitting = x_train[c].values.array.reshape(-1, 1) 
+            s = scaler.fit(data_for_fitting)
+            x_train[c] = scaler.transform(x_train[c].values)
             x_test[c] = scaler.transform(x_test[c].values)
-            print('scaling {} with {}'.format(c, scaler.fit(x_train[c].values)))
+            print('scaling {} with {}'.format(c, s))
 
         for d in config.CATEGORICAL:
             x_train = etl.create_dummies(x_train, d)
