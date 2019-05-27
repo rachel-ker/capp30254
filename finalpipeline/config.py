@@ -30,6 +30,7 @@ CATEGORICAL = ['school_city', 'school_state', 'school_metro', 'school_district',
             'secondary_focus_area', 'resource_type', 'poverty_level', 'grade_level',
             'total_price_including_optional_support', 'students_reached',
             'eligible_double_your_impact_match']
+CONTINUOUS = ['school_latitude', 'school_longitude']
 
 ## FEATURES
 FEATURES = ['school_latitude', 'school_longitude', 'school_city', 'school_state', 

@@ -17,6 +17,7 @@ import csv
 import config
 import etl
 
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import ParameterGrid
 import sklearn.metrics
@@ -412,6 +413,12 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
         x_train = etl.replace_missing_with_mode(x_train, x_train, missing)
         x_test = etl.replace_missing_with_mode(x_test, x_test, missing)
         print('imputation done')
+
+        scaler = MinMaxScaler()
+        for c in config.CONTINUOUS:
+            x_train[c] = scaler.fit_transform(x_train[c])
+            x_test[c] = scaler.transform(x_test[c])
+            print('scaling {} with {}'.format(c, scaler.fit(x_train[c])))
 
         for d in config.CATEGORICAL:
             x_train = etl.create_dummies(x_train, d)
