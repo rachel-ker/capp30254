@@ -413,7 +413,7 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
         x_test = etl.replace_missing_with_mode(x_test, x_test, missing)
         print('imputation done')
 
-        for d in list(x_train.columns):
+        for d in config.CATEGORICAL:
             x_train = etl.create_dummies(x_train, d)
             x_test = etl.create_dummies(x_test, d)
 

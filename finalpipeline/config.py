@@ -24,10 +24,17 @@ DISCRETE_LEVELS = [(3, ['low','medium','high']), (3,['low','medium','high']) ]
 MISSING = ['school_metro', 'school_district', 'primary_focus_subject', 'primary_focus_area',
            'secondary_focus_subject', 'secondary_focus_area', 'resource_type',
            'grade_level', 'students_reached']
+CATEGORICAL = ['school_city', 'school_state', 'school_metro', 'school_district', 
+            'school_county', 'school_charter', 'school_magnet', 'teacher_prefix', 
+            'primary_focus_subject', 'primary_focus_area', 'secondary_focus_subject', 
+            'secondary_focus_area', 'resource_type', 'poverty_level', 'grade_level',
+            'total_price_including_optional_support', 'students_reached',
+            'eligible_double_your_impact_match']
 
 ## FEATURES
-FEATURES = ['school_city', 'school_state', 'school_metro', 'school_district', 
-            'school_county', 'school_charter', 'school_magnet', 'teacher_prefix', 
+FEATURES = ['school_latitude', 'school_longitude', 'school_city', 'school_state', 
+            'school_metro', 'school_district', 'school_county',
+            'school_charter', 'school_magnet', 'teacher_prefix', 
             'primary_focus_subject', 'primary_focus_area', 'secondary_focus_subject', 
             'secondary_focus_area', 'resource_type', 'poverty_level', 'grade_level',
             'total_price_including_optional_support', 'students_reached',
@@ -38,7 +45,7 @@ METRICS_THRESHOLD = (['precision', 'recall', 'f1'], [1,2,5,10,20,30])
 OTHER_METRICS = ['auc']
 
 ## RUNNING THE MODELS
-GRIDSIZE = 'large'
+GRIDSIZE = 'test'
 OUTFILE = "results_"+GRIDSIZE+".csv"
 MODELS = ['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM', 'NB']
 SEED = 0
