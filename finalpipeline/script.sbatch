@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=large_all_features
-#SBATCH --output=largeallfeatures.out
-#SBATCH --error=largeallfeatures.err
+#SBATCH --job-name=test
+#SBATCH --output=test.out
+#SBATCH --error=test.err
 #SBATCH --partition=broadwl
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=14
