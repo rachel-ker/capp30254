@@ -416,10 +416,10 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
 
         scaler = MinMaxScaler()
         for c in config.CONTINUOUS:
-            data_for_fitting = x_train[c].values.array.reshape(-1, 1) 
+            data_for_fitting = x_train[c].values.reshape(-1, 1) 
             s = scaler.fit(data_for_fitting)
-            x_train[c] = scaler.transform(x_train[c].values)
-            x_test[c] = scaler.transform(x_test[c].values)
+            x_train[c] = scaler.transform(x_train[c].values.reshape(-1, 1))
+            x_test[c] = scaler.transform(x_test[c].values.reshape(-1, 1))
             print('scaling {} with {}'.format(c, s))
 
         for d in config.CATEGORICAL:
