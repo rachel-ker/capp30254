@@ -2,7 +2,6 @@
 #SBATCH --job-name=test
 #SBATCH --output=test.out
 #SBATCH --error=test.err
-#SBATCH --time=07-00:00:00
 #SBATCH --partition=broadwl
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=14
