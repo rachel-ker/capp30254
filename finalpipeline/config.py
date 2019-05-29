@@ -33,13 +33,7 @@ CATEGORICAL = ['school_city', 'school_state', 'school_metro', 'school_district',
 CONTINUOUS = ['school_latitude', 'school_longitude']
 
 ## FEATURES
-FEATURES = ['school_latitude', 'school_longitude', 'school_city', 'school_state', 
-            'school_metro', 'school_district', 'school_county',
-            'school_charter', 'school_magnet', 'teacher_prefix', 
-            'primary_focus_subject', 'primary_focus_area', 'secondary_focus_subject', 
-            'secondary_focus_area', 'resource_type', 'poverty_level', 'grade_level',
-            'total_price_including_optional_support', 'students_reached',
-            'eligible_double_your_impact_match']
+FEATURES = CATEGORICAL + CONTINUOUS
 
 ## EVALUATION AND RESULTS
 METRICS_THRESHOLD = (['precision', 'recall', 'f1'], [1,2,5,10,20,30,50])
