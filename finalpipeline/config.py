@@ -42,7 +42,7 @@ FEATURES = ['school_latitude', 'school_longitude', 'school_city', 'school_state'
             'eligible_double_your_impact_match']
 
 ## EVALUATION AND RESULTS
-METRICS_THRESHOLD = (['precision', 'recall', 'f1'], [1,2,5,10,20,30])
+METRICS_THRESHOLD = (['precision', 'recall', 'f1'], [1,2,5,10,20,30,50])
 OTHER_METRICS = ['auc']
 
 ## RUNNING THE MODELS

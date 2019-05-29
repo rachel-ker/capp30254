@@ -180,6 +180,13 @@ def replace_dates_with_datetime(df, date_cols):
     df[date_cols] = df[date_cols].apply(pd.to_datetime)
     return df
 
+def create_missing_ind(df, col):
+    '''
+    Create a variable that indicates the obs that were missing
+    '''
+    df.loc[:,col + '_missing'] = df[col].isna().astype(int)
+    return df
+
 
 def replace_missing_value(df, col, val):
     '''
@@ -188,7 +195,6 @@ def replace_missing_value(df, col, val):
     values = {col: val}
     df.fillna(value=values, inplace=True)
     return df
-
 
 
 def replace_missing_with_mode(data_with_missing, data_to_calculate_mode, cols):

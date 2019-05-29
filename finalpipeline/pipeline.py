@@ -406,8 +406,8 @@ def iterate_models(data, grid_size, outcomes, features, missing, to_discretize, 
         print('discretization done')
 
         for m in missing:
-            x_train.loc[:,m + '_missing'] = x_train[m].isna().astype(int)
-            x_test.loc[:,m + '_missing'] = x_test[m].isna().astype(int)
+            x_train = etl.create_missing_ind(x_train, m)
+            x_test = etl.create_missing_ind(x_test, m)
         print('missing indicators created')
 
         x_train = etl.replace_missing_with_mode(x_train, x_train, missing)
