@@ -44,6 +44,7 @@ GRIDSIZE = 'test'
 OUTFILE = "results_"+GRIDSIZE+".csv"
 MODELS = ['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM', 'NB']
 SEED = 0
+GRAPH_FOLDER = 'graphs/'
 
 
 def define_clfs_params(grid_size):

@@ -238,7 +238,7 @@ def plot_roc_curve(y_test, predicted_scores, labels):
     plt.ylabel('True Positive Rate')
     plt.title('Receiver operating characteristic')
     plt.legend(loc="lower right")
-    plt.savefig('graphs/ROC curves')
+    plt.savefig(config.GRAPH_FOLDER+'ROC curves')
     plt.show()
     # (Source: https://towardsdatascience.com/building-a-logistic-regression-in-python-step-by-step-becd4d56c9c8)
 
@@ -260,7 +260,7 @@ def plot_precision_recall_curve(y_test, predicted_scores, model_names):
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.title('Precision-Recall Curve')
-    plt.savefig('graphs/precision recall curve')
+    plt.savefig(config.GRAPH_FOLDER+'precision recall curve')
     plt.show()
 
 
@@ -302,7 +302,7 @@ def plot_precision_recall_n(y_true, y_prob, model_name, output_type):
     plt.title(model_name)
 
     if (output_type == 'save'):
-        plt.savefig("graphs/" + model_name)
+        plt.savefig(config.GRAPH_FOLDER + model_name)
     elif (output_type == 'show'):
         plt.show()
     else:
