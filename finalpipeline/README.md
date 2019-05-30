@@ -15,6 +15,9 @@ pipeline.py - generic code for train-test split, evaluation, building the differ
 config.py - configurations and constants for this code  
 run.py - putting everything together to apply to DonorsChoose data (produces a csv file of results)  
   
+results.ipynb - jupyter notebook that explores and understand the results produced  
+writeup.pdf - Write up about results produced by the data
+  
 requirements.txt - required libraries and versions  
 script.sbatch - to run job on rcc  
 Data folder include the data used  
