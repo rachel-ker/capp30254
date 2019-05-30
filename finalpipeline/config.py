@@ -45,6 +45,7 @@ OUTFILE = "results_"+GRIDSIZE+".csv"
 MODELS = ['RF', 'ET', 'GB', 'AB', 'BAG', 'DT', 'KNN', 'LR', 'SVM', 'NB']
 SEED = 0
 
+
 def define_clfs_params(grid_size):
     """
     This functions defines parameter grid for all the classifiers
@@ -85,7 +86,7 @@ def define_clfs_params(grid_size):
     'BAG':  {'n_estimators': [10,100,1000], 'n_jobs': [-1], 'random_state': [SEED]},
     'NB':   {'alpha': [0.01,0.1,1,10], 'fit_prior': [True, False]}
             }
-    
+       
     test_grid = {
     'RF':   {'n_estimators': [5], 'max_depth': [5], 'max_features': ['sqrt'], 'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
     'ET':   {'n_estimators': [5], 'criterion' : ['gini'] ,'max_depth': [5],
@@ -99,6 +100,13 @@ def define_clfs_params(grid_size):
     'BAG':  {'n_estimators': [1], 'n_jobs': [-1], 'random_state': [SEED]},
     'NB':   {'alpha': [1], 'fit_prior': [True, False]}    
             }
+    
+    tiny_grid = {
+    'RF':   {'n_estimators': [100], 'max_depth': [10], 'max_features': ['sqrt'],
+             'min_samples_split': [10], 'n_jobs': [-1], 'random_state': [SEED]},
+    'DT':   {'criterion': ['gini', 'entropy'], 'max_depth': [1,5,10,20], 'min_samples_split': [2,10,50], 'random_state': [SEED]},
+    'LR':   {'penalty': ['l2'], 'C': [0.01,0.1,1], 'random_state': [SEED]}
+               }
 
     
     if (grid_size == 'large'):
@@ -107,5 +115,7 @@ def define_clfs_params(grid_size):
         return small_grid
     elif (grid_size == 'test'):
         return test_grid
+    elif (grid_size == 'tiny'):
+        return tiny_grid
     else:
         return 0, 0

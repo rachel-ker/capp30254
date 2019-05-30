@@ -336,6 +336,27 @@ def get_best_models(df, time_col, test_years, cols, metric):
 
     return best_models
 
+def sort_models(data, metric, top_k, cols):
+    '''
+    Get top k models
+    '''
+    sort = data.sort_values(metric, ascending=False)
+    results = sort[cols][:top_k]
+    return results
+
+
+def get_stability_score(trainsets, metric, cols):
+    '''
+    Identify models that are top ranking in all train test sets
+    '''
+    result = pd.DataFrame()
+    for sets in trainsets:
+        sort = sets.sort_values(metric, ascending=False)
+        sort['rank'] = range(len(sort))
+        result = result.append(sort)
+    result = result[cols + ['rank']]
+    return result.groupby('parameters').mean().sort_values('rank')
+
 
 #######################
 #   Building Models   #

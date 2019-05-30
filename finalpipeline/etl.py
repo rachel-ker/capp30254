@@ -255,6 +255,20 @@ def discretize(df, continuous_var, n, labels, bins=True):
         return df
     
         
+def create_dummy_by_cat(df, col, categories):
+    '''
+    Specify categories to create dummies on
+    Inputs:
+        df: pandas df
+        col: categorical var
+        categories: list of cats we want to create dummies on
+    '''
+    for cat in categories:
+        filtr = df[col]==cat
+        df[col+'_{}'.format(cat)] = filtr.astype(int)
+    df.drop(col, axis=1, inplace=True)
+    return df
+
 
 def create_dummies(df, categorical_var):
     '''
